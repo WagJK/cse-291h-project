@@ -1,0 +1,72 @@
+﻿  physics.h
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(196,34): warning C4244: 'return': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(222,29): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(225,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(229,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(237,66): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(238,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(239,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(243,56): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(244,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(249,66): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(250,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(263,29): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(293,90): warning C4244: 'argument': conversion from 'T' to 'const unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\physics.h(307,90): warning C4244: 'argument': conversion from 'T' to 'const unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+  cse-291h-project.vcxproj -> C:\Workspace\cse-291h-project\cse-291h-project\Debug\cse-291h-project.exe
