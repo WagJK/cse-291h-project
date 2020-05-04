@@ -4,14 +4,23 @@
 #include <cmath>
 #include "shader.h"
 #include "camera.h"
-#include "concreteblock.h"
-#include "concreteblockitg.h"
+#include "input.h"
+#include "sph.h"
+#include "sphintegrator.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
 void processInput(GLFWwindow* window);
-void checkGLerrors();
+
+void checkGLerrors() {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR)
+        std::cout << err;
+}
 
 // settings
 const unsigned int SCR_WIDTH = 1920;
@@ -28,7 +37,7 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 
-void display(Shader myShader, float* vertices, int len_vertices, unsigned int* indices, int len_indices) {
+void display(Shader myShader, float* vertices, int len_vertices) {
 
     // activate shader
     myShader.use();
@@ -124,52 +133,7 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
     glDeleteBuffers(1, &EBO);
 }
 
-
-void display_xyz(Shader myShader) {
-    // activate shader
-    myShader.use();
-
-    // pass projection matrix to shader (note that in this case it could change every frame)
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    myShader.setMat4("projection", projection);
-
-    // camera/view transformation
-    glm::mat4 view = camera.GetViewMatrix();
-    myShader.setMat4("view", view);
-
-    // calculate the model matrix for each object and pass it to shader before drawing
-    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    myShader.setMat4("model", model);
-
-    glm::vec3 fragcolor(0.0f, 1.0f, 1.0f);
-    myShader.setVec3("fragColor", fragcolor);
-
-    // render boxes
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    float xyz[18] = {0,0,0, 0,100,0, 0,0,0, 0,0,100, 0,0,0, 100,0,0};
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), xyz, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_LINES, 0, 18);
-    glBindVertexArray(0);
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-}
-
 bool pause = true;
-
 int main()
 {
     // glfw: initialize and configure
@@ -214,29 +178,27 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader myShader("vertex.shader", "fragment.shader");
+    Shader myShader("project2/shader/vertex.shader", "project2/shader/fragment.shader");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
-    const float E = 1400;
-    const float v = 0.30;
-    const float mass = 1;
-    const float penalty = 200;
-    vec3 pos(0, 3, 0), size(7, 5, 5), gap(1.0f, 1.0f, 1.0f), vel(0, 0, 0);
-    ConcreteBlockSystem cbs(pos, size, gap, mass, E, v);
-    ConcreteBlockIntegrator itg(penalty);
-    cbs.SetVelocities(vel);
-
-    float* vertices = new float[3 * cbs.GetNumDofs()];
-    unsigned int* indices = new unsigned int[2 * cbs.GetNumLines()];
-    float* accs     = new float[6 * cbs.GetNumDofs()];
-
-    cbs.GetPositions(vertices); 
-    cbs.GetLinesIndices(indices);
-    cbs.GetAccelations(accs);
-    cbs.ApplyGForces();
+    const float k               = 1.0;
+    const float density0        = 1.0;
+    const float supportRadius   = 10.0;
+    const float smoothingRadius = 10.0;
+    const float penalty         = 200;
+    const vec3 pos(0, 0, 0), size(10, 10, 10), gap(1, 1, 1), vel(0, 0, 0);
+    SPHSystem sph(pos, size, gap, k, density0, supportRadius, smoothingRadius);
+    SPHIntegrator itg(penalty);
     
-    display(myShader, vertices, 3 * cbs.GetNumDofs(), indices, 2 * cbs.GetNumLines());
+    float* vertices = new float[3 * sph.getSize()];
+    float* accs     = new float[6 * sph.getSize()];
+    unsigned int* indices = new unsigned int[2 * sph.getNumLines()];
+
+    sph.getPositions(vertices); 
+    sph.applyGForces();
+    
+    display(myShader, vertices, 3 * sph.getSize());
 
     // render loop
     // -----------
@@ -259,19 +221,18 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        cbs.ClearTempForces();
-        cbs.ComputeForces();
+        sph.clearTempForces();
+        sph.applySPHForces();
 
-        if (!pause) itg.Integrate(cbs, deltaTime);
+        if (!pause) itg.Integrate(sph, deltaTime);
 
-        cbs.GetPositions(vertices);
-        cbs.GetAccelations(accs);
-        // cbs.PrintPositions();
+        sph.getPositions(vertices);
+        // sph.getPosAcc(accs);
+        // sph.PrintPositions();
         
         if (cnt % 5 == 0) {
-            // display_xyz(myShader);
-            display(myShader, vertices, 3 * cbs.GetNumDofs(), indices, 2 * cbs.GetNumLines());
-            //display_acc(myShader, accs, 6 * cbs.GetNumDofs());
+            display(myShader, vertices, 3 * sph.getSize());
+            //display_acc(myShader, accs, 6 * sph.getSize());
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -281,74 +242,10 @@ int main()
         checkGLerrors();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    
-
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        pause ^= true;
-}
 
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-}
-
-
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(yoffset);
-}
-
-void checkGLerrors() {
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << err;
-    }
-}

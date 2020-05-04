@@ -17,7 +17,6 @@ public:
     ConcreteBlockSystem(vec3 pos, vec3 size, vec3 gap, float mass, float E, float v) :
         pos(pos), size(size), gap(gap), mass(mass), E(E), v(v)
     {
-
         for (int ix = 0; ix < size[0]; ix++) {
             Ps.push_back(vector<vector<Particle>>());
             for (int iy = 0; iy < size[1]; iy++) {

@@ -13,47 +13,76 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\shader">
+    <Filter Include="Source Files\project1">
+      <UniqueIdentifier>{35a522ad-df67-44b3-8817-868e85927889}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\project1\header">
+      <UniqueIdentifier>{c3558dde-488a-4c0b-8f5a-34a04b759273}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\project1\shader">
       <UniqueIdentifier>{b185514d-9e3d-4392-a95e-654b536168a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\header">
-      <UniqueIdentifier>{c3558dde-488a-4c0b-8f5a-34a04b759273}</UniqueIdentifier>
+    <Filter Include="Source Files\project2">
+      <UniqueIdentifier>{0a3dde4e-5a24-4ce7-a9b2-4c9708358b96}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="project1\main.cpp">
+      <Filter>Source Files\project1</Filter>
+    </ClCompile>
+    <ClCompile Include="project2\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="concreteblockitg.h">
-      <Filter>Source Files\header</Filter>
+    <ClCompile Include="project1\concreteblockintegrator.h">
+      <Filter>Source Files\project1\header</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vertex.shader">
-      <Filter>Source Files\shader</Filter>
+    <None Include="project1\shader\fragment.shader">
+      <Filter>Source Files\project1\shader</Filter>
     </None>
-    <None Include="fragment.shader">
-      <Filter>Source Files\shader</Filter>
+    <None Include="project1\shader\vertex.shader">
+      <Filter>Source Files\project1\shader</Filter>
     </None>
+    <None Include="project2\shader\fragment.shader" />
+    <None Include="project2\shader\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h">
-      <Filter>Source Files\header</Filter>
+    <ClInclude Include="project1\particle.h">
+      <Filter>Source Files\project1\header</Filter>
     </ClInclude>
-    <ClInclude Include="concreteblock.h">
-      <Filter>Source Files\header</Filter>
+    <ClInclude Include="project1\shader.h">
+      <Filter>Source Files\project1\header</Filter>
     </ClInclude>
-    <ClInclude Include="particle.h">
-      <Filter>Source Files\header</Filter>
+    <ClInclude Include="project1\tetrahedron.h">
+      <Filter>Source Files\project1\header</Filter>
     </ClInclude>
-    <ClInclude Include="shader.h">
-      <Filter>Source Files\header</Filter>
+    <ClInclude Include="project1\concreteblock.h">
+      <Filter>Source Files\project1\header</Filter>
     </ClInclude>
-    <ClInclude Include="tetrahedron.h">
-      <Filter>Source Files\header</Filter>
+    <ClInclude Include="project1\camera.h">
+      <Filter>Source Files\project1\header</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\sph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\sphintegrator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\sphparticle.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

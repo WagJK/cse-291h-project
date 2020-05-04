@@ -1,0 +1,53 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1006,5): warning MSB8027: Two or more files with the name of main.cpp will produce outputs to the same location. This can lead to an incorrect build result.  The files involved are project1\main.cpp, project2\main.cpp.
+  main.cpp
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\shader.h(56,40): warning C4101: 'e': unreferenced local variable
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(71,34): warning C4244: 'return': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(105,29): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(108,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(112,46): warning C4244: '=': conversion from 'T' to 'unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(146,29): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(177,29): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(205,90): warning C4244: 'argument': conversion from 'T' to 'const unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\concreteblock.h(219,90): warning C4244: 'argument': conversion from 'T' to 'const unsigned int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(178,25): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(204,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(282,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(283,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(287,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(288,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(290,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(291,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project1\main.cpp(300,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  cse-291h-project.vcxproj -> C:\Workspace\cse-291h-project\cse-291h-project\Debug\cse-291h-project.exe

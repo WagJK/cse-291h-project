@@ -20,19 +20,28 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="concreteblockitg.h" />
+    <ClCompile Include="project1\main.cpp" />
+    <ClCompile Include="project1\concreteblockintegrator.h" />
+    <ClCompile Include="project2\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment.shader" />
-    <None Include="vertex.shader" />
+    <None Include="project1\shader\fragment.shader" />
+    <None Include="project1\shader\vertex.shader" />
+    <None Include="project2\shader\fragment.shader" />
+    <None Include="project2\shader\vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="concreteblock.h" />
-    <ClInclude Include="particle.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="tetrahedron.h" />
+    <ClInclude Include="project1\camera.h" />
+    <ClInclude Include="project1\concreteblock.h" />
+    <ClInclude Include="project1\particle.h" />
+    <ClInclude Include="project1\shader.h" />
+    <ClInclude Include="project1\tetrahedron.h" />
+    <ClInclude Include="project2\camera.h" />
+    <ClInclude Include="project2\input.h" />
+    <ClInclude Include="project2\sphparticle.h" />
+    <ClInclude Include="project2\shader.h" />
+    <ClInclude Include="project2\sph.h" />
+    <ClInclude Include="project2\sphintegrator.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
