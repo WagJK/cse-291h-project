@@ -16,16 +16,19 @@
     <Filter Include="Source Files\shader">
       <UniqueIdentifier>{b185514d-9e3d-4392-a95e-654b536168a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\header">
+      <UniqueIdentifier>{c3558dde-488a-4c0b-8f5a-34a04b759273}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="physics.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="concreteblockitg.h">
+      <Filter>Source Files\header</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -37,11 +40,20 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="camera.h">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\header</Filter>
+    </ClInclude>
+    <ClInclude Include="concreteblock.h">
+      <Filter>Source Files\header</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>Source Files\header</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>Source Files\header</Filter>
+    </ClInclude>
+    <ClInclude Include="tetrahedron.h">
+      <Filter>Source Files\header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
