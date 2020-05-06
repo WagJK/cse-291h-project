@@ -9,17 +9,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/scalar_multiplication.hpp>
 #include "sphparticle.h"
+#include "spatialhashtable.h"
 
 #define PI 3.14159265358979323846264338327950288
 
 using namespace std;
 using namespace glm;
 
-class SPHSystem 
-{
+class SPHSystem {
+
 private:
+    SpatialHashTable* table;
     vector<Particle> Ps;
-    float k, density0, supportRadius, smoothingRadius;
+    vec3 spos, size, gap, m_d;
+    float k, density0, supportRadius, smoothingRadius, penalty;
 
     float f(float q) {
         float ans;
@@ -50,7 +53,7 @@ private:
 
     vec3 dW(Particle x_i, Particle x_j) {
         float q = distance(x_i.getPosition(), x_j.getPosition()) / smoothingRadius;
-        vec3 norm = TODO;
+        vec3 norm = x_i.getPosition() - x_j.getPosition();
         norm = norm / sqrt(dot(norm, norm));
         return 1.0 / pow(smoothingRadius, 4) * df(q) * norm;
     }
@@ -109,25 +112,23 @@ private:
     }
 
 public:
-    SPHSystem(vec3 pos, vec3 size, vec3 gap,
-        float k, float density0, float supportRadius, float smoothingRadius) {
-        this->k = k;
-        this->density0 = density0;
-        this->supportRadius = supportRadius;
-        this->smoothingRadius = smoothingRadius;
-
+    SPHSystem(vec3 pos, vec3 size, vec3 gap, vec3 m_d, float penalty, 
+        float k, float density0, float supportRadius, float smoothingRadius) :
+        spos(pos), size(size), gap(gap), m_d(m_d), penalty(penalty), 
+        k(k), density0(density0), supportRadius(supportRadius), smoothingRadius(smoothingRadius)
+    {
+        this->table = new SpatialHashTable(m_d);
         float mass = pow(smoothingRadius, 3) * density0;
         // float mass = pow(2.0 / 3.0 * smoothingRadius, 3) * density0;
         for (int ix = 0; ix < size[0]; ix++) {
             for (int iy = 0; iy < size[1]; iy++) {
                 for (int iz = 0; iz < size[2]; iz++) {
-                    mat4 rotate_matrix(1.0f);
-                    rotate_matrix = rotate(rotate_matrix, radians(0.0f), vec3(0, 0, 1));
-                    rotate_matrix = rotate(rotate_matrix, radians(0.0f), vec3(1, 0, 0));
+                    // mat4 rotate_matrix(1.0f);
+                    // rotate_matrix = rotate(rotate_matrix, radians(0.0f), vec3(0, 0, 1));
+                    // rotate_matrix = rotate(rotate_matrix, radians(0.0f), vec3(1, 0, 0));
                     vec3 ppos(gap[0] * ix, gap[1] * iy, gap[2] * iz);
-                    ppos = rotate_matrix * vec4(ppos, 1);
+                    // ppos = rotate_matrix * vec4(ppos, 1);
                     ppos = ppos + pos;
-
                     Particle P(ppos, 0); 
                     Ps.push_back(P);
                 }
@@ -135,13 +136,53 @@ public:
         }
     }
 
+    void applyGForces() {
+        vec3 g(0.0f, -9.8f, 0.0f);
+        for (int i = 0 ; i < Ps.size() ; i++)
+            Ps[i].applyPermForce(Ps[i].getMass() * g);
+    }
+
+    void applySPHForces() {
+        for (int i = 0 ; i < Ps.size() ; i++) {
+            Ps[i].applyTempForce(computeFpres(Ps[i]));
+            Ps[i].applyTempForce(computeFvisc(Ps[i]));
+        }
+    }
+
+    void applyPenaltyForces() {
+        for (int i = 0; i < Ps.size(); i++) {
+            vec3 pos = Ps[i].getPosition();
+            if (pos.y <= 0) {
+                vec3 penalty_force(0, -penalty * pos.y, 0);
+                Ps[i].applyTempForce(penalty_force);
+            }
+            if (pos.x <= 0) {
+                vec3 penalty_force(-penalty * pos.x, 0, 0);
+                Ps[i].applyTempForce(penalty_force);
+            }
+            if (pos.x > spos.x + gap.x * (size.x - 1)) {
+                vec3 penalty_force(-penalty * (pos.x - (spos.x + gap.x * (size.x - 1))), 0, 0);
+                Ps[i].applyTempForce(penalty_force);
+            }
+            if (pos.z <= 0) {
+                vec3 penalty_force(0, 0, -penalty * pos.z);
+                Ps[i].applyTempForce(penalty_force);
+            }
+            if (pos.z > spos.z + gap.z * (size.z - 1)) {
+                vec3 penalty_force(0, 0, -penalty * (pos.z - (spos.z + gap.z * (size.z - 1))));
+                Ps[i].applyTempForce(penalty_force);
+            }
+        }
+    }
+
+    void buildTable() {
+        table->clear();
+        table->build(Ps);
+    }
+
     int getSize() { return Ps.size(); }
 
     int getNumDofs() { return getSize(); }
-
-    int getNumLines() {
-
-    }
 
     void getParticles(vector<Particle*>& ps) {
         ps.clear();
@@ -190,19 +231,6 @@ public:
             Ps[i].setVelocity(vel[i]);
     }
 
-    void applyGForces() {
-        vec3 g(0.0f, -9.8f, 0.0f);
-        for (int i = 0 ; i < Ps.size() ; i++)
-            Ps[i].applyPermForce(Ps[i].getMass() * g);
-    }
-
-    void applySPHForces() {
-        for (int i = 0 ; i < Ps.size() ; i++) {
-            Ps[i].applyTempForce(computeFpres(Ps[i]));
-            Ps[i].applyTempForce(computeFvisc(Ps[i]));
-        }
-    }
-
     void applyTempForces(vec3& f) {
         for (int i = 0 ; i < Ps.size() ; i++)
             Ps[i].applyTempForce(f);
@@ -239,7 +267,7 @@ public:
         }
     }
 
-    void PrintPositions() 
+    void printPositions() 
     {
         printf("=========================================\n");
         for (int i = 0 ; i < Ps.size() ; i++) {

@@ -15,16 +15,9 @@ public:
         int numDofs = system.getSize();
         vector<vec3> pos(numDofs), vel(numDofs), acc(numDofs);
         vector<Particle*> ps(numDofs);
-
         system.getPositions(pos);
         system.getVelocities(vel);
         system.getParticles(ps);
-        for (int i = 0; i < numDofs; i++) {
-            if (pos[i][1] <= 0) {
-                vec3 penalty_force(0, -Penalty * pos[i][1], 0);
-                ps[i]->applyTempForce(penalty_force);
-            }
-        }
         system.getAccelations(acc);
         // Forward Euler step
         for (int i = 0; i < numDofs; i++) {

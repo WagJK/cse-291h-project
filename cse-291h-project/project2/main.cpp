@@ -69,15 +69,14 @@ void display(Shader myShader, float* vertices, int len_vertices) {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, len_vertices * sizeof(float), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, len_indices * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, len_indices * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-
     glBindVertexArray(VAO);
-    glDrawElements(GL_LINES, len_indices, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_POINTS, 0, len_vertices);
     glBindVertexArray(0);
 
     glDeleteVertexArrays(1, &VAO);
@@ -122,7 +121,6 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-
     glBindVertexArray(VAO);
     glDrawArrays(GL_LINES, 0, len_accs);
     // glDrawElements(GL_LINES, len_indices, GL_UNSIGNED_INT, 0);
@@ -132,6 +130,7 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
 }
+
 
 bool pause = true;
 int main()
@@ -187,13 +186,16 @@ int main()
     const float supportRadius   = 10.0;
     const float smoothingRadius = 10.0;
     const float penalty         = 200;
-    const vec3 pos(0, 0, 0), size(10, 10, 10), gap(1, 1, 1), vel(0, 0, 0);
-    SPHSystem sph(pos, size, gap, k, density0, supportRadius, smoothingRadius);
+    const vec3 pos(0, 0, 0);
+    const vec3 size(50, 50, 50);
+    const vec3 gap(1, 1, 1);
+    const vec3 m_d(supportRadius, supportRadius, supportRadius);
+    
+    SPHSystem sph(pos, size, gap, m_d, penalty, k, density0, supportRadius, smoothingRadius);
     SPHIntegrator itg(penalty);
     
     float* vertices = new float[3 * sph.getSize()];
     float* accs     = new float[6 * sph.getSize()];
-    unsigned int* indices = new unsigned int[2 * sph.getNumLines()];
 
     sph.getPositions(vertices); 
     sph.applyGForces();
@@ -221,8 +223,10 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        sph.buildTable();
         sph.clearTempForces();
         sph.applySPHForces();
+        sph.applyPenaltyForces();
 
         if (!pause) itg.Integrate(sph, deltaTime);
 
