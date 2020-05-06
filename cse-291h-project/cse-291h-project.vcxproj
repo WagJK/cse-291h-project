@@ -37,7 +37,7 @@
     <ClInclude Include="project1\shader.h" />
     <ClInclude Include="project1\tetrahedron.h" />
     <ClInclude Include="project2\camera.h" />
-    <ClInclude Include="project2\input.h" />
+    <ClInclude Include="project2\sphmap.h" />
     <ClInclude Include="project2\sphparticle.h" />
     <ClInclude Include="project2\shader.h" />
     <ClInclude Include="project2\sph.h" />

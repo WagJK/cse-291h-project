@@ -24,7 +24,8 @@ public:
             vel[i] += acc[i] * timestep;
             pos[i] += vel[i] * timestep;
             vel[i] = vel[i] * 0.999;
-        } // Store results
+        }
+        // Store results
         system.setPositions(pos);
         system.setVelocities(vel);
     }

@@ -4,9 +4,11 @@
 #include <cmath>
 #include "shader.h"
 #include "camera.h"
-#include "input.h"
 #include "sph.h"
 #include "sphintegrator.h"
+
+using namespace std;
+using namespace glm;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -27,34 +29,34 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(glm::vec3(0.0f, 3.0f, 23.0f));
+Camera camera(vec3(0.0f, 3.0f, 23.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
+float totalTime = 0.0f;
 float lastFrame = 0.0f;
 
-
-void display(Shader myShader, float* vertices, int len_vertices) {
+void display_sph(Shader myShader, float* vertices, int len_vertices) {
 
     // activate shader
     myShader.use();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     myShader.setMat4("projection", projection);
 
     // camera/view transformation
-    glm::mat4 view = camera.GetViewMatrix();
+    mat4 view = camera.GetViewMatrix();
     myShader.setMat4("view", view);
 
     // calculate the model matrix for each object and pass it to shader before drawing
-    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
     myShader.setMat4("model", model);
 
-    glm::vec3 fragcolor(1.0f, 1.0f, 1.0f);
+    vec3 fragcolor(1.0f, 1.0f, 1.0f);
     myShader.setVec3("fragColor", fragcolor);
 
 
@@ -84,24 +86,23 @@ void display(Shader myShader, float* vertices, int len_vertices) {
     glDeleteBuffers(1, &EBO);
 }
 
-
 void display_acc(Shader myShader, float* accs, int len_accs) {
     // activate shader
     myShader.use();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
-    glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     myShader.setMat4("projection", projection);
 
     // camera/view transformation
-    glm::mat4 view = camera.GetViewMatrix();
+    mat4 view = camera.GetViewMatrix();
     myShader.setMat4("view", view);
 
     // calculate the model matrix for each object and pass it to shader before drawing
-    glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
     myShader.setMat4("model", model);
 
-    glm::vec3 fragcolor(1.0f, 1.0f, 0.0f);
+    vec3 fragcolor(1.0f, 1.0f, 0.0f);
     myShader.setVec3("fragColor", fragcolor);
 
     // render boxes
@@ -131,6 +132,67 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
     glDeleteBuffers(1, &EBO);
 }
 
+void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
+
+    float vertices[24] = {
+        lb.x, lb.y, lb.z,
+        lb.x, lb.y, ub.z,
+        lb.x, ub.y, lb.z,
+        lb.x, ub.y, ub.z,
+        ub.x, lb.y, lb.z,
+        ub.x, lb.y, ub.z,
+        ub.x, ub.y, lb.z,
+        ub.x, ub.y, ub.z,
+    };
+
+    unsigned int indices[24] = {
+        0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3,
+        2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7,
+    };
+
+    // activate shader
+    myShader.use();
+
+    // pass projection matrix to shader (note that in this case it could change every frame)
+    mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    myShader.setMat4("projection", projection);
+
+    // camera/view transformation
+    mat4 view = camera.GetViewMatrix();
+    myShader.setMat4("view", view);
+
+    // calculate the model matrix for each object and pass it to shader before drawing
+    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    myShader.setMat4("model", model);
+
+    vec3 fragcolor(1.0f, 1.0f, 0.0f);
+    myShader.setVec3("fragColor", fragcolor);
+
+    // render boxes
+    unsigned int VBO, VAO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 24 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
 
 bool pause = true;
 int main()
@@ -183,15 +245,17 @@ int main()
     // ------------------------------------------------------------------    
     const float k               = 1.0;
     const float density0        = 1.0;
-    const float supportRadius   = 10.0;
-    const float smoothingRadius = 10.0;
-    const float penalty         = 200;
-    const vec3 pos(0, 0, 0);
-    const vec3 size(50, 50, 50);
-    const vec3 gap(1, 1, 1);
-    const vec3 m_d(supportRadius, supportRadius, supportRadius);
-    
-    SPHSystem sph(pos, size, gap, m_d, penalty, k, density0, supportRadius, smoothingRadius);
+    const float supportRadius   = 5.0;
+    const float smoothingRadius = 7.0;
+    const float penalty         = 1400;
+    const vec3  pos(0, 0, 0);
+    const vec3  size(18, 4, 4);
+    const vec3  gap(1, 1, 1);
+    const vec3  m_d(supportRadius, supportRadius, supportRadius);
+    const vec3  container_lb(-0.5, -0.5, -0.5);
+    const vec3  container_ub(17.5, 3.5, 3.5);
+
+    SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius);
     SPHIntegrator itg(penalty);
     
     float* vertices = new float[3 * sph.getSize()];
@@ -199,8 +263,7 @@ int main()
 
     sph.getPositions(vertices); 
     sph.applyGForces();
-    
-    display(myShader, vertices, 3 * sph.getSize());
+    display_sph(myShader, vertices, 3 * sph.getSize());
 
     // render loop
     // -----------
@@ -211,8 +274,6 @@ int main()
         // --------------------
         float currentFrame = glfwGetTime();
         // deltaTime = currentFrame- lastFrame;
-        deltaTime = 0.01f;
-        lastFrame = currentFrame;
 
         // input
         // -----
@@ -223,22 +284,31 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        sph.buildTable();
-        sph.clearTempForces();
-        sph.applySPHForces();
-        sph.applyPenaltyForces();
+        if (!pause) {
+            deltaTime = 0.01f;
+            totalTime += deltaTime;
+            lastFrame = currentFrame;
 
-        if (!pause) itg.Integrate(sph, deltaTime);
+            sph.build();
+            sph.clearTempForces();
+            sph.applySPHForces();
 
-        sph.getPositions(vertices);
-        // sph.getPosAcc(accs);
-        // sph.PrintPositions();
-        
-        if (cnt % 5 == 0) {
-            display(myShader, vertices, 3 * sph.getSize());
-            //display_acc(myShader, accs, 6 * sph.getSize());
+            vec3 shrink(10, 0, 0);
+            shrink = shrink * (sin(totalTime - PI / 2) + 1) * 1 / 2;
+            sph.setContainer(container_lb, container_ub - shrink);
+            sph.applyPenaltyForces();
+
+            itg.Integrate(sph, deltaTime);
+
+            sph.getPositions(vertices);
+            sph.getPosAcc(accs);
+            
+            if (cnt % 40 == 0) {
+                display_ctn(myShader, container_lb, container_ub - shrink);
+                display_sph(myShader, vertices, 3 * sph.getSize());
+                // display_acc(myShader, accs,  6 * sph.getSize());
+            }
         }
-
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -252,4 +322,53 @@ int main()
     return 0;
 }
 
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        pause ^= true;
+}
 
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(yoffset);
+}

@@ -2,6 +2,9 @@
 #define SPHPARTICLE_H
 
 #include <vector>
+#include <map>
+#include <cmath> 
+#include <algorithm>
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/geometric.hpp>
@@ -12,47 +15,91 @@ using namespace std;
 
 class Particle {
 private:
-    vec3 Position;
-    vec3 Velocity;
-    vec3 PermForce;
-    vec3 TempForce;
-    float Mass;
+    vec3 pos;
+    vec3 vel;
+    vec3 permF;
+    vec3 tempF;
+    float mass;
+    float dens;
+    float pres;
+    vec3 Fpres;
+    vec3 Fvisc;
+    bool built_basics;
+    bool built_forces;
 
 public:
-    Particle(vec3 Position, float Mass) : Position(Position), Mass(Mass) {
-        Velocity *= 0;
-        TempForce *= 0;
-        PermForce *= 0;
+    Particle(vec3 pos, float mass) : pos(pos), mass(mass) {
+        vel *= 0;
+        tempF *= 0;
+        permF *= 0;
+        built_basics = false;
+        dens = 0;
+        pres = 0;
+        built_forces = false;
+        Fpres = { 0, 0, 0 };
+        Fvisc = { 0, 0, 0 };
     }
 
-    float getMass() { return Mass; }
+    float getMass() { return mass; }
 
-    vec3 getPosition() { return Position; }
+    float getDensity() { 
+        if (!built_basics) throw "basics not built!";
+        return dens; 
+    }
 
-    vec3 getVelocity() { return Velocity; }
+    float getPressure() {
+        if (!built_basics) throw "basics not built!"; 
+        return pres; 
+    }
 
-    void setMass(float Mass) { this->Mass = Mass; }
+    vec3 getFpres() {
+        if (!built_forces) throw "forces not built!";
+        return Fpres;
+    }
 
-    void setPosition(vec3 Position) { this->Position = Position; }
+    vec3 getFvisc() {
+        if (!built_forces) throw "forces not built!";
+        return Fvisc;
+    }
 
-    void setVelocity(vec3 Velocity) { this->Velocity = Velocity; }
+    vec3 getPosition() { return pos; }
 
-    void clearTempForce() { TempForce *= 0; }
+    vec3 getVelocity() { return vel; }
 
-    void clearPermForce() { PermForce *= 0; }
+    void setMass(float mass) { this->mass = mass; }
 
-    void applyPermForce(vec3 f) { PermForce += f;  }
+    void setDensity(float dens) { this->dens = dens;  }
 
-    void applyTempForce(vec3 f) { TempForce += f; }
+    void setPressure(float pres) { this->pres = pres; }
 
-    vec3 computeTempAcceleration() { return (1 / Mass) * (TempForce); }
+    void setFpres(vec3 Fpres) { this->Fpres = Fpres; }
 
-    vec3 computeAcceleration() { return (1 / Mass) * (TempForce + PermForce); }
+    void setFvisc(vec3 Fvisc) { this->Fvisc = Fvisc; }
+
+    void setPosition(vec3 pos) { this->pos = pos; }
+
+    void setVelocity(vec3 vel) { this->vel = vel; }
+
+    void set_built_basics(bool flag) { this->built_basics = flag; }
+
+    void set_built_forces(bool flag) { this->built_forces = flag; }
+
+    void clearTempForce() { tempF *= 0; }
+
+    void clearPermForce() { permF *= 0; }
+
+    void applyPermForce(vec3 f) { permF += f;  }
+
+    void applyTempForce(vec3 f) { tempF += f; }
+
+    vec3 computeTempAcceleration() { return (1 / mass) * (tempF); }
+
+    vec3 computeAcceleration() { return (1 / mass) * (tempF + permF); }
 
     void integrate(float deltaTime) {
         vec3 accel = computeAcceleration();
-        Velocity += accel * deltaTime;
-        Position += Velocity * deltaTime;
+        vel += accel * deltaTime;
+        pos += vel * deltaTime;
     }
 };
 
