@@ -1,170 +1,74 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1006,5): warning MSB8027: 名为 main.cpp 的两个或更多文件将生成到同一位置的输出。这会导致错误的生成结果。   调用的文件是 project1\main.cpp, project2\main.cpp。
-  glad.c
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1006,5): warning MSB8027: Two or more files with the name of main.cpp will produce outputs to the same location. This can lead to an incorrect build result.  The files involved are project1\main.cpp, project2\main.cpp.
   main.cpp
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\shader.h(56,40): warning C4101: “e”: 未引用的局部变量
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(70,34): warning C4244: “return”: 从“T”转换到“int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\shader.h(56,40): warning C4101: 'e': unreferenced local variable
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(51,50): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(104,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(51,37): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(107,46): warning C4244: “=”: 从“T”转换到“unsigned int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(51,24): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(111,46): warning C4244: “=”: 从“T”转换到“unsigned int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(59,50): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(145,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(59,37): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(176,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sphmap.h(59,24): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(204,90): warning C4244: “参数”: 从“T”转换到“const unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(218,90): warning C4244: “参数”: 从“T”转换到“const unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(178,25): warning C4305: “初始化”: 从“double”到“float”截断
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(204,28): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(282,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(283,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(287,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(288,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(290,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(291,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\main.cpp(300,31): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
-  concreteblockintegrator.h
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(70,34): warning C4244: “return”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(104,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(107,46): warning C4244: “=”: 从“T”转换到“unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(111,46): warning C4244: “=”: 从“T”转换到“unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(145,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(176,29): warning C4244: “初始化”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(204,90): warning C4244: “参数”: 从“T”转换到“const unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project1\concreteblock.h(218,90): warning C4244: “参数”: 从“T”转换到“const unsigned int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-  main.cpp
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\shader.h(56,40): warning C4101: “e”: 未引用的局部变量
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(21,55): warning C4305: “初始化”: 从“double”到“float”截断
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(69,54): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(69,39): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(69,24): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
-          with
-          [
-              T=float
-          ]
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(37,41): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(39,29): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(42,32): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(48,26): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(50,24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(53,32): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(58,46): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(75,20): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(90,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(91,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(100,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(124,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(157,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(190,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(195,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(200,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(205,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(217,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(248,27): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(258,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(263,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(271,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(276,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(284,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(289,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(294,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(299,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(304,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(314,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(325,28): warning C4018: “<”: 有符号/无符号不匹配
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(275,28): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(358,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(359,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(362,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(363,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(364,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(365,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(373,31): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
-  正在生成代码...
-Debug\main.obj : warning LNK4042: 对象被多次指定；已忽略多余的指定
-main.obj : error LNK2019: 无法解析的外部符号 _glfwInit，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwTerminate，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwWindowHint，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwCreateWindow，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwWindowShouldClose，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSetWindowShouldClose，该符号在函数 "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPAUGLFWwindow@@@Z) 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSetFramebufferSizeCallback，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwPollEvents，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSetInputMode，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwGetKey，该符号在函数 "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPAUGLFWwindow@@@Z) 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSetCursorPosCallback，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSetScrollCallback，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwGetTime，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwMakeContextCurrent，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwSwapBuffers，该符号在函数 _main 中被引用
-main.obj : error LNK2019: 无法解析的外部符号 _glfwGetProcAddress，该符号在函数 _main 中被引用
-C:\OpenGL\Libraries\glfw3.lib : warning LNK4272: 库计算机类型“x64”与目标计算机类型“x86”冲突
-C:\Users\wangj\source\repos\cse-291h-project\Debug\cse-291h-project.exe : fatal error LNK1120: 16 个无法解析的外部命令
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(44,41): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(46,29): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(49,32): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(55,26): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(57,24): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(60,32): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(65,46): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(82,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(103,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(104,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(105,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(119,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(145,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(178,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(210,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(215,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(220,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(225,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(237,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(268,27): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(279,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(287,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(292,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(300,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(305,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(310,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(315,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(320,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(330,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(341,28): warning C4018: '<': signed/unsigned mismatch
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(221,39): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(235,29): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(251,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(330,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(331,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(334,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(335,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(336,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(337,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(345,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+  cse-291h-project.vcxproj -> C:\Workspace\cse-291h-project\cse-291h-project\Debug\cse-291h-project.exe

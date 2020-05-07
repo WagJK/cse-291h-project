@@ -2,6 +2,7 @@
 #define SPH_H
 
 #include <vector>
+#include <cstdlib>
 #include <cmath> 
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
@@ -35,6 +36,7 @@ private:
     float supportRadius;
     float smoothingRadius;
     float penalty;
+    float viscosity;
 
     float f(float q) {
         float ans;
@@ -71,18 +73,24 @@ private:
     }
 
 public:
-    SPHSystem(vec3 pos, vec3 size, vec3 gap, vec3 m_d, vec3 container_lb, vec3 container_ub, 
-        float penalty, float k, float density0, float supportRadius, float smoothingRadius) :
+    SPHSystem(vec3 pos, vec3 size, vec3 gap, float m_d, vec3 container_lb, vec3 container_ub, 
+        float penalty, float k, float density0, float supportRadius, float smoothingRadius, float viscosity) :
         spos(pos), size(size), gap(gap), m_d(m_d), container_lb(container_lb), container_ub(container_ub),
-        penalty(penalty), k(k), density0(density0), supportRadius(supportRadius), smoothingRadius(smoothingRadius)
+        penalty(penalty), k(k), density0(density0), supportRadius(supportRadius), smoothingRadius(smoothingRadius), viscosity(viscosity)
     {
         this->table = new SpatialHashTable(m_d);
         float mass = pow(supportRadius / 2.0, 3) * density0; // pow(2.0 / 3.0 * smoothingRadius, 3) * density0;
+
+        vec3 center((size.x-1) * gap.x / 2, (size.y - 1) * gap.y / 2, (size.z - 1) * gap.z / 2);
         for (int ix = 0; ix < size[0]; ix++) {
             for (int iy = 0; iy < size[1]; iy++) {
                 for (int iz = 0; iz < size[2]; iz++) {
                     vec3 ppos(gap[0] * ix, gap[1] * iy, gap[2] * iz);
-                    ppos = ppos + pos;
+
+                    if (distance(ppos, center) > (size.x - 1) * gap.x / 2 + 0.1) continue;
+
+                    vec3 rand(0.1 * rand() / RAND_MAX, 0.1 * rand() / RAND_MAX, 0.1 * rand() / RAND_MAX);
+                    ppos = ppos + pos + rand;
                     Ps.push_back(new Particle(ppos, mass));
                 }
             }
@@ -92,22 +100,30 @@ public:
     void build() {
         table->clear();
         table->build(Ps);
+        for (int i = 0; i < Ps.size(); i++) computeNeighbors(Ps[i]);
         for (int i = 0; i < Ps.size(); i++) computeBasics(Ps[i]);
         for (int i = 0; i < Ps.size(); i++) computeForces(Ps[i]);
+    }
+
+    void computeNeighbors(Particle* p) {
+        table->neighbors(p, p->getNeighbors(false));
+        p->setBuiltNeighborsFlag(true);
     }
 
     void computeBasics(Particle* p) {
         float mass = p->getMass();
         vec3 pos = p->getPosition();
-        vector<Particle*> neighbors = table->neighbors(p);
+        vector<Particle*>* neighbors = p->getNeighbors(true);
         // compute density & pressure
         float dens = 0;
-        for (int i = 0; i < neighbors.size(); i++)
-            dens += neighbors[i]->getMass() * W(p, neighbors[i], smoothingRadius);
+        for (int j = 0; j < neighbors->size(); j++) {
+            Particle* p_j = neighbors->at(j);
+            dens += p_j->getMass() * W(p, p_j, smoothingRadius);
+        }
         float pres = k * (pow(dens / density0, 7) - 1);
         p->setDensity(dens);
         p->setPressure(pres);
-        p->set_built_basics(true);
+        p->setBuiltBasicsFlag(true);
     }
 
     void computeForces(Particle* p) {
@@ -116,7 +132,7 @@ public:
         float mass = p->getMass();
         float dens = p->getDensity();
         float pres = p->getPressure();
-        vector<Particle*> neighbors = table->neighbors(p);
+        vector<Particle*>* neighbors = p->getNeighbors(true);
         // -----------------------
         // compute F_pressure
         // -----------------------
@@ -126,16 +142,16 @@ public:
             printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tdensity: %.2f\tpressure: %.2f\n",
                 tpos.x, tpos.y, tpos.z, mass, dens, pres);
         }
-        for (int j = 0; j < neighbors.size(); j++) {
-            float mass_j = neighbors[j]->getMass();
-            float dens_j = neighbors[j]->getDensity();
-            float pres_j = neighbors[j]->getPressure();
-            vec3 dW_ij = dW(p, neighbors[j], smoothingRadius);
+        for (int j = 0; j < neighbors->size(); j++) {
+            Particle* p_j = neighbors->at(j);
+            float mass_j = p_j->getMass();
+            float dens_j = p_j->getDensity();
+            float pres_j = p_j->getPressure();
+            vec3 dW_ij = dW(p, p_j, smoothingRadius);
             vec3 dPres_j = mass_j * (pres / pow(dens, 2) + pres_j / pow(dens_j, 2)) * dW_ij;
             dPres += dPres_j;
-
             if (SHOW_FPRES) {
-                vec3 tpos = neighbors[j]->getPosition();
+                vec3 tpos = p_j->getPosition();
                 printf("\tstats of %.0f-%.0f-%.0f:\tmass: %.2f  density: %.2f  pressure: %.2f  param: %.2f  dW: %.2f-%.2f-%.2f  dPres: %.2f-%.2f-%.2f\n",
                     tpos.x, tpos.y, tpos.z,
                     mass_j, dens_j, pres_j,
@@ -159,17 +175,18 @@ public:
             printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tvel: %.2f-%.2f-%.2f\n",
                 tpos.x, tpos.y, tpos.z, mass, vel.x, vel.y, vel.z);
         }
-        for (int j = 0; j < neighbors.size(); j++) {
-            float mass_j = neighbors[j]->getMass();
-            float dens_j = neighbors[j]->getDensity();
-            vec3 x_ij = pos - neighbors[j]->getPosition();
-            vec3 v_ij = vel - neighbors[j]->getVelocity();
-            vec3 dW_ij = dW(p, neighbors[j], smoothingRadius);
+        for (int j = 0; j < neighbors->size(); j++) {
+            Particle* p_j = neighbors->at(j);
+            float mass_j = p_j->getMass();
+            float dens_j = p_j->getDensity();
+            vec3 x_ij = pos - p_j->getPosition();
+            vec3 v_ij = vel - p_j->getVelocity();
+            vec3 dW_ij = dW(p, p_j, smoothingRadius);
             vec3 ddVisc_j = mass_j / dens_j * v_ij * (dot(x_ij, dW_ij) / (dot(x_ij, x_ij) + 0.01 * pow(smoothingRadius, 2)));
             ddVisc += ddVisc_j;
 
             if (SHOW_FVISC) {
-                vec3 tpos = neighbors[j]->getPosition();
+                vec3 tpos = p_j->getPosition();
                 printf("\tstats of %.0f-%.0f-%.0f:\tmass: %.2f  density: %.2f  dW: %.2f-%.2f-%.2f  ddVisc: %.2f-%.2f-%.2f\n",
                     tpos.x, tpos.y, tpos.z,
                     mass_j, dens_j,
@@ -178,15 +195,14 @@ public:
                 );
             }
         }
-        vec3 Fvisc = 2 * mass * vel * ddVisc;
+        vec3 Fvisc = 2 * mass * viscosity * ddVisc;
         if (SHOW_FVISC) {
             printf("ddVisc: %.4f %.4f %.4f\n", ddVisc.x, ddVisc.y, ddVisc.z);
             printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);
         }
-
         p->setFpres(Fpres);
         p->setFvisc(Fvisc);
-        p->set_built_forces(true);
+        p->setBuiltForcesFlag(true);
     }
 
     void applyGForces() {
@@ -198,7 +214,7 @@ public:
     void applyTempForces(vec3& f) {
         for (int i = 0; i < Ps.size(); i++)
             Ps[i]->applyTempForce(f);
-    }
+    }   
 
     void clearTempForces() {
         for (int i = 0; i < Ps.size(); i++)
@@ -257,11 +273,7 @@ public:
 
     int getNumDofs() { return getSize(); }
 
-    void getParticles(vector<Particle*>& ps) {
-        ps.clear();
-        for (int i = 0 ; i < ps.size() ; i++) 
-            ps.push_back(Ps[i]);
-    }
+    vector<Particle*>* getParticles() { return &Ps; }
 
     void getPositions(float* pos) {
         for (int i = 0 ; i < Ps.size() ; i++) {

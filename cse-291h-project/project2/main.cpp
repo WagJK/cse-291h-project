@@ -10,20 +10,6 @@
 using namespace std;
 using namespace glm;
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
-void processInput(GLFWwindow* window);
-
-void checkGLerrors() {
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR)
-        std::cout << err;
-}
-
 // settings
 const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
@@ -39,24 +25,34 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float totalTime = 0.0f;
 float lastFrame = 0.0f;
 
-void display_sph(Shader myShader, float* vertices, int len_vertices) {
-    // activate shader
-    myShader.use();
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
-    // pass projection matrix to shader (note that in this case it could change every frame)
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+void processInput(GLFWwindow* window);
+
+void checkGLerrors() {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR)
+        std::cout << err;
+}
+
+void display_sph(Shader myShader, float* vertices, int len_vertices) {
+    myShader.use();
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     mat4 view = camera.GetViewMatrix();
     mat4 model = mat4(1.0f);
-    vec3 fragcolor(1.0f, 1.0f, 1.0f);
+    vec3 fragcolor(0.2f, 0.2f, 0.6f);
 
     myShader.setMat4("projection", projection);
     myShader.setMat4("model", model);
     myShader.setMat4("view", view);
     myShader.setVec3("fragColor", fragcolor);
-    myShader.setFloat("pointScale", 1000.0);
+    myShader.setFloat("pointScale", 800.0);
     myShader.setFloat("pointRadius", 1.0);
 
-    // render boxes
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -67,7 +63,6 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
 
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     // glBufferData(GL_ELEMENT_ARRAY_BUFFER, len_indices * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -81,25 +76,17 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
 }
 
 void display_acc(Shader myShader, float* accs, int len_accs) {
-    // activate shader
     myShader.use();
-
-    // pass projection matrix to shader (note that in this case it could change every frame)
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    myShader.setMat4("projection", projection);
-
-    // camera/view transformation
     mat4 view = camera.GetViewMatrix();
-    myShader.setMat4("view", view);
-
-    // calculate the model matrix for each object and pass it to shader before drawing
-    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    myShader.setMat4("model", model);
-
+    mat4 model = mat4(1.0f); 
     vec3 fragcolor(1.0f, 1.0f, 0.0f);
+
+    myShader.setMat4("projection", projection);
+    myShader.setMat4("view", view);
+    myShader.setMat4("model", model);
     myShader.setVec3("fragColor", fragcolor);
 
-    // render boxes
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -109,7 +96,6 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, len_accs * sizeof(float), accs, GL_STATIC_DRAW);
-
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     // glBufferData(GL_ELEMENT_ARRAY_BUFFER, len_indices * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
@@ -140,31 +126,22 @@ void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
         ub.x, ub.y, lb.z,
         ub.x, ub.y, ub.z,
     };
-
     unsigned int indices[24] = {
         0, 1, 0, 2, 0, 4, 1, 3, 1, 5, 2, 3,
         2, 6, 3, 7, 4, 5, 4, 6, 5, 7, 6, 7,
     };
 
-    // activate shader
     myShader.use();
-
-    // pass projection matrix to shader (note that in this case it could change every frame)
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    myShader.setMat4("projection", projection);
-
-    // camera/view transformation
     mat4 view = camera.GetViewMatrix();
-    myShader.setMat4("view", view);
-
-    // calculate the model matrix for each object and pass it to shader before drawing
-    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    myShader.setMat4("model", model);
-
+    mat4 model = mat4(1.0f);
     vec3 fragcolor(1.0f, 1.0f, 0.0f);
-    myShader.setVec3("fragColor", fragcolor);
 
-    // render boxes
+    myShader.setMat4("projection", projection);
+    myShader.setMat4("view", view);
+    myShader.setMat4("model", model);
+    myShader.setVec3("fragColor", fragcolor);
+    
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -174,7 +151,6 @@ void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), vertices, GL_STATIC_DRAW);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 24 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
 
@@ -244,18 +220,19 @@ int main()
     // ------------------------------------------------------------------    
     const float k               = 5e-4;
     const float density0        = 1e3;
-    const float supportRadius   = 6.0;
-    const float smoothingRadius = 3.0;
-    const float penalty         = 200000000;
-    const vec3  pos(0, 0, 0);
-    const vec3  size(4, 8, 4);
-    const vec3  gap(1, 0.2, 1);
-    const vec3  m_d(supportRadius, supportRadius, supportRadius);
-    const vec3  container_lb(-0.1, 0, -0.1);
-    const vec3  container_ub(3.1, 7.1, 3.1);
+    const float supportRadius   = 3;
+    const float smoothingRadius = 1.5;
+    const float viscosity       = 5e-1;
+    const float penalty         = 1e6;
+    const float m_d             = supportRadius;
+    const vec3  pos(0, 1, 0);
+    const vec3  size(10, 10, 10);
+    const vec3  gap(0.5, 0.5, 0.5);
+    const vec3  container_lb(-1, -0.1, -1);
+    const vec3  container_ub(5.5, 11, 5.5);
 
-    SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius);
-    SPHIntegrator itg(penalty);
+    SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius, viscosity);
+    SPHIntegrator itg(0.999);
     
     float* vertices = new float[3 * sph.getSize()];
     float* accs     = new float[6 * sph.getSize()];
@@ -284,29 +261,25 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (!pause) {
-            deltaTime = 0.01f;
+            deltaTime = 0.04f;
             totalTime += deltaTime;
             lastFrame = currentFrame;
 
             sph.build();
             sph.clearTempForces();
             sph.applySPHForces();
-
-            vec3 shrink(1, 0, 0);
-            shrink = shrink * (sin(totalTime * 3 - PI / 2) + 1) * 1 / 2;
-            sph.setContainer(container_lb, container_ub - shrink);
+            vec3 shrink(0, 0, 0);
+                // vec3 shrink(1, 0, 0);
+                // shrink = shrink * (sin(totalTime * 3 - PI / 2) + 1) * 1 / 2;
+                // sph.setContainer(container_lb, container_ub - shrink);
             sph.applyPenaltyForces();
-
-            itg.Integrate(sph, deltaTime);
+            itg.integrate(sph, deltaTime);
+            // sph.getPosAcc(accs);
 
             sph.getPositions(vertices);
-            sph.getPosAcc(accs);
-            
-            if (cnt % 40 == 0) {
-                display_ctn(lineShader, container_lb, container_ub - shrink);
-                display_sph(sphereShader, vertices, 3 * sph.getSize());
-                // display_acc(myShader, accs,  6 * sph.getSize());
-            }
+            display_ctn(lineShader, container_lb, container_ub - shrink);
+            display_sph(sphereShader, vertices, 3 * sph.getSize());
+            // display_acc(myShader, accs,  6 * sph.getSize());
         }
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

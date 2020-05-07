@@ -24,82 +24,83 @@ private:
     float pres;
     vec3 Fpres;
     vec3 Fvisc;
-    bool built_basics;
-    bool built_forces;
+    vector<Particle*>* neighbors;
+    bool flagBuiltBasics;
+    bool flagBuiltForces;
+    bool flagBuiltNeighbors;
 
 public:
     Particle(vec3 pos, float mass) : pos(pos), mass(mass) {
         vel *= 0;
         tempF *= 0;
         permF *= 0;
-        built_basics = false;
+        flagBuiltBasics = false;
         dens = 0;
         pres = 0;
-        built_forces = false;
+        flagBuiltForces = false;
         Fpres = { 0, 0, 0 };
         Fvisc = { 0, 0, 0 };
+        flagBuiltNeighbors = false;
+        neighbors = new vector<Particle*>();
     }
 
     float getMass() { return mass; }
-
-    float getDensity() { 
-        if (!built_basics) throw "basics not built!";
-        return dens; 
-    }
-
-    float getPressure() {
-        if (!built_basics) throw "basics not built!"; 
-        return pres; 
-    }
-
-    vec3 getFpres() {
-        if (!built_forces) throw "forces not built!";
-        return Fpres;
-    }
-
-    vec3 getFvisc() {
-        if (!built_forces) throw "forces not built!";
-        return Fvisc;
-    }
-
-    vec3 getPosition() { return pos; }
-
-    vec3 getVelocity() { return vel; }
-
     void setMass(float mass) { this->mass = mass; }
 
-    void setDensity(float dens) { this->dens = dens;  }
+    float getDensity() { 
+        if (!flagBuiltBasics) throw "basics not built!";
+        return dens; 
+    }
+    void setDensity(float dens) { this->dens = dens; }
 
+    float getPressure() {
+        if (!flagBuiltBasics) throw "basics not built!"; 
+        return pres; 
+    }
     void setPressure(float pres) { this->pres = pres; }
 
+    vec3 getFpres() {
+        if (!flagBuiltForces) throw "forces not built!";
+        return Fpres;
+    }
     void setFpres(vec3 Fpres) { this->Fpres = Fpres; }
 
+    vec3 getFvisc() {
+        if (!flagBuiltForces) throw "forces not built!";
+        return Fvisc;
+    }
     void setFvisc(vec3 Fvisc) { this->Fvisc = Fvisc; }
 
+    vec3 getPosition() { return pos; }
     void setPosition(vec3 pos) { this->pos = pos; }
 
+    vec3 getVelocity() { return vel; }
     void setVelocity(vec3 vel) { this->vel = vel; }
 
-    void set_built_basics(bool flag) { this->built_basics = flag; }
+    void setNeighbors(vector<Particle*>* ps) { neighbors = ps; }
+    vector<Particle*>* getNeighbors(bool check) {
+        if (check && !flagBuiltNeighbors)
+            throw "neighbors not built!";
+        return neighbors;
+    }
 
-    void set_built_forces(bool flag) { this->built_forces = flag; }
+    void setBuiltBasicsFlag(bool flag) { this->flagBuiltBasics = flag; }
+    void setBuiltForcesFlag(bool flag) { this->flagBuiltForces = flag; }
+    void setBuiltNeighborsFlag(bool flag) { this->flagBuiltNeighbors = flag; }
 
     void clearTempForce() { tempF *= 0; }
-
     void clearPermForce() { permF *= 0; }
-
     void applyPermForce(vec3 f) { permF += f;  }
-
     void applyTempForce(vec3 f) { tempF += f; }
 
     vec3 computeTempAcceleration() { return (1 / mass) * (tempF); }
-
     vec3 computeAcceleration() { return (1 / mass) * (tempF + permF); }
 
-    void integrate(float deltaTime) {
-        vec3 accel = computeAcceleration();
-        vel += accel * deltaTime;
+    void integrate(float deltaTime, float penalty) {
+        vec3 acc = computeAcceleration();
+        vel += acc * deltaTime;
         pos += vel * deltaTime;
+        vel = vel * penalty;
     }
 };
 
