@@ -40,34 +40,28 @@ float totalTime = 0.0f;
 float lastFrame = 0.0f;
 
 void display_sph(Shader myShader, float* vertices, int len_vertices) {
-
     // activate shader
     myShader.use();
 
     // pass projection matrix to shader (note that in this case it could change every frame)
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    myShader.setMat4("projection", projection);
-
-    // camera/view transformation
     mat4 view = camera.GetViewMatrix();
-    myShader.setMat4("view", view);
-
-    // calculate the model matrix for each object and pass it to shader before drawing
-    mat4 model = mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    myShader.setMat4("model", model);
-
+    mat4 model = mat4(1.0f);
     vec3 fragcolor(1.0f, 1.0f, 1.0f);
-    myShader.setVec3("fragColor", fragcolor);
 
+    myShader.setMat4("projection", projection);
+    myShader.setMat4("model", model);
+    myShader.setMat4("view", view);
+    myShader.setVec3("fragColor", fragcolor);
+    myShader.setFloat("pointScale", 1000.0);
+    myShader.setFloat("pointRadius", 1.0);
 
     // render boxes
     unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
-
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, len_vertices * sizeof(float), vertices, GL_STATIC_DRAW);
 
@@ -133,7 +127,9 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
 }
 
 void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
-
+    vec3 half = {0.5, 0.5, 0.5};
+    lb -= half;
+    ub += half;
     float vertices[24] = {
         lb.x, lb.y, lb.z,
         lb.x, lb.y, ub.z,
@@ -236,24 +232,27 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader myShader("project2/shader/vertex.shader", "project2/shader/fragment.shader");
+    Shader sphereShader ("project2/shader/sphere_vertex.shader",    "project2/shader/sphere_fragment.shader");
+    Shader lineShader   ("project2/shader/line_vertex.shader",      "project2/shader/line_fragment.shader");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
-    const float k               = 1.0;
-    const float density0        = 1.0;
-    const float supportRadius   = 5.0;
-    const float smoothingRadius = 7.0;
-    const float penalty         = 1400;
+    const float k               = 5e-4;
+    const float density0        = 1e3;
+    const float supportRadius   = 6.0;
+    const float smoothingRadius = 3.0;
+    const float penalty         = 200000000;
     const vec3  pos(0, 0, 0);
-    const vec3  size(18, 4, 4);
-    const vec3  gap(1, 1, 1);
+    const vec3  size(4, 8, 4);
+    const vec3  gap(1, 0.2, 1);
     const vec3  m_d(supportRadius, supportRadius, supportRadius);
-    const vec3  container_lb(-0.5, -0.5, -0.5);
-    const vec3  container_ub(17.5, 3.5, 3.5);
+    const vec3  container_lb(-0.1, 0, -0.1);
+    const vec3  container_ub(3.1, 7.1, 3.1);
 
     SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius);
     SPHIntegrator itg(penalty);
@@ -263,7 +262,7 @@ int main()
 
     sph.getPositions(vertices); 
     sph.applyGForces();
-    display_sph(myShader, vertices, 3 * sph.getSize());
+    display_sph(sphereShader, vertices, 3 * sph.getSize());
 
     // render loop
     // -----------
@@ -293,8 +292,8 @@ int main()
             sph.clearTempForces();
             sph.applySPHForces();
 
-            vec3 shrink(10, 0, 0);
-            shrink = shrink * (sin(totalTime - PI / 2) + 1) * 1 / 2;
+            vec3 shrink(1, 0, 0);
+            shrink = shrink * (sin(totalTime * 3 - PI / 2) + 1) * 1 / 2;
             sph.setContainer(container_lb, container_ub - shrink);
             sph.applyPenaltyForces();
 
@@ -304,8 +303,8 @@ int main()
             sph.getPosAcc(accs);
             
             if (cnt % 40 == 0) {
-                display_ctn(myShader, container_lb, container_ub - shrink);
-                display_sph(myShader, vertices, 3 * sph.getSize());
+                display_ctn(lineShader, container_lb, container_ub - shrink);
+                display_sph(sphereShader, vertices, 3 * sph.getSize());
                 // display_acc(myShader, accs,  6 * sph.getSize());
             }
         }

@@ -27,8 +27,10 @@
   <ItemGroup>
     <None Include="project1\shader\fragment.shader" />
     <None Include="project1\shader\vertex.shader" />
-    <None Include="project2\shader\fragment.shader" />
-    <None Include="project2\shader\vertex.shader" />
+    <None Include="project2\shader\line_fragment.shader" />
+    <None Include="project2\shader\line_vertex.shader" />
+    <None Include="project2\shader\sphere_fragment.shader" />
+    <None Include="project2\shader\sphere_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="project1\camera.h" />
@@ -42,6 +44,7 @@
     <ClInclude Include="project2\shader.h" />
     <ClInclude Include="project2\sph.h" />
     <ClInclude Include="project2\sphintegrator.h" />
+    <ClInclude Include="project2\sphnaive.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

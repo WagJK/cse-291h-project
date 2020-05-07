@@ -12,13 +12,10 @@
 #include "sphparticle.h"
 
 #define LOG 0
-#define SHOW_FPRES 0
-#define SHOW_FVISC 0
 
 using namespace glm;
 using namespace std;
 
-const float PI = 3.14159265358979323846264338327950288;
 
 class int3 {
 private:
@@ -30,7 +27,7 @@ public:
     int3(int x, int y, int z) {
         if (abs(x) > MAX_BID || abs(y) > MAX_BID || abs(z) > MAX_BID)
             throw "int3 max size exceeded!";
-        this->set(x, y, z);
+         this->set(x, y, z);
     }
 
     void set(int x, int y, int z) {

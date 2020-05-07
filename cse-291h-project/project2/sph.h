@@ -11,6 +11,11 @@
 #include "sphparticle.h"
 #include "sphmap.h"
 
+#define LOG 0
+#define SHOW_FPRES 0
+#define SHOW_FVISC 0
+#define PI 3.14159265358979323846264338327950288
+
 using namespace std;
 using namespace glm;
 
@@ -140,7 +145,7 @@ public:
                 );
             }
         }
-        vec3 Fpres = -mass * dPres;
+        vec3 Fpres = - mass * dPres;
         if (SHOW_FPRES) {
             printf("dpres: %.4f %.4f %.4f\n", dPres.x, dPres.y, dPres.z);
             printf("Fpres: %.4f %.4f %.4f\n", Fpres.x, Fpres.y, Fpres.z);
@@ -160,7 +165,7 @@ public:
             vec3 x_ij = pos - neighbors[j]->getPosition();
             vec3 v_ij = vel - neighbors[j]->getVelocity();
             vec3 dW_ij = dW(p, neighbors[j], smoothingRadius);
-            vec3 ddVisc_j = mass_j / dens_j * v_ij * (x_ij * dW_ij) / (dot(x_ij, x_ij) + 0.01 * pow(smoothingRadius, 2));
+            vec3 ddVisc_j = mass_j / dens_j * v_ij * (dot(x_ij, dW_ij) / (dot(x_ij, x_ij) + 0.01 * pow(smoothingRadius, 2)));
             ddVisc += ddVisc_j;
 
             if (SHOW_FVISC) {
@@ -173,8 +178,7 @@ public:
                 );
             }
         }
-        ddVisc *= 2;
-        vec3 Fvisc = mass * vel * ddVisc;
+        vec3 Fvisc = 2 * mass * vel * ddVisc;
         if (SHOW_FVISC) {
             printf("ddVisc: %.4f %.4f %.4f\n", ddVisc.x, ddVisc.y, ddVisc.z);
             printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);

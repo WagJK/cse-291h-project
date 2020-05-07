@@ -23,7 +23,7 @@ public:
         for (int i = 0; i < numDofs; i++) {
             vel[i] += acc[i] * timestep;
             pos[i] += vel[i] * timestep;
-            vel[i] = vel[i] * 0.999;
+            vel[i] = vel[i] * 0.99;
         }
         // Store results
         system.setPositions(pos);

@@ -1,18 +1,37 @@
-﻿main.obj : error LNK2019: unresolved external symbol glfwInit referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwTerminate referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwWindowHint referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwCreateWindow referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwWindowShouldClose referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwSetWindowShouldClose referenced in function "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPEAUGLFWwindow@@@Z)
-main.obj : error LNK2019: unresolved external symbol glfwSetFramebufferSizeCallback referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwPollEvents referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwSetInputMode referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwGetKey referenced in function "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPEAUGLFWwindow@@@Z)
-main.obj : error LNK2019: unresolved external symbol glfwSetCursorPosCallback referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwSetScrollCallback referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwGetTime referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwMakeContextCurrent referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwSwapBuffers referenced in function main
-main.obj : error LNK2019: unresolved external symbol glfwGetProcAddress referenced in function main
-C:\OpenGL\Libraries\glfw3.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
-C:\Workspace\cse-291h-project\cse-291h-project\x64\Debug\cse-291h-project.exe : fatal error LNK1120: 16 unresolved externals
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(1006,5): warning MSB8027: 名为 main.cpp 的两个或更多文件将生成到同一位置的输出。这会导致错误的生成结果。   调用的文件是 project1\main.cpp, project2\main.cpp。
+  main.cpp
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\shader.h(56,40): warning C4101: “e”: 未引用的局部变量
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(66,54): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(66,39): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sphmap.h(66,24): warning C4244: “参数”: 从“T”转换到“int”，可能丢失数据
+          with
+          [
+              T=float
+          ]
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(42,41): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(44,29): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(47,32): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(53,26): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(55,24): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(58,32): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(63,46): warning C4244: “return”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(80,20): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\sph.h(256,19): warning C4267: “return”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(245,39): warning C4305: “初始化”: 从“double”到“float”截断
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(274,28): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(357,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(358,17): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(361,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(362,19): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(363,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(364,13): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+C:\Users\wangj\source\repos\cse-291h-project\cse-291h-project\project2\main.cpp(372,31): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+  cse-291h-project.vcxproj -> C:\Users\wangj\source\repos\cse-291h-project\x64\Debug\cse-291h-project.exe

@@ -47,8 +47,10 @@
     <None Include="project1\shader\vertex.shader">
       <Filter>Source Files\project1\shader</Filter>
     </None>
-    <None Include="project2\shader\fragment.shader" />
-    <None Include="project2\shader\vertex.shader" />
+    <None Include="project2\shader\sphere_fragment.shader" />
+    <None Include="project2\shader\sphere_vertex.shader" />
+    <None Include="project2\shader\line_fragment.shader" />
+    <None Include="project2\shader\line_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="project1\particle.h">
@@ -82,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="project2\sphmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="project2\sphnaive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
