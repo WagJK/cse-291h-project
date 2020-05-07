@@ -89,7 +89,7 @@ public:
 
                     if (distance(ppos, center) > (size.x - 1) * gap.x / 2 + 0.1) continue;
 
-                    vec3 rand(0.1 * rand() / RAND_MAX, 0.1 * rand() / RAND_MAX, 0.1 * rand() / RAND_MAX);
+                    vec3 rand(0.01 * rand() / RAND_MAX, 0.01 * rand() / RAND_MAX, 0.01 * rand() / RAND_MAX);
                     ppos = ppos + pos + rand;
                     Ps.push_back(new Particle(ppos, mass));
                 }
@@ -206,7 +206,7 @@ public:
     }
 
     void applyGForces() {
-        vec3 g(0.0f, -9.8f, 0.0f);
+        vec3 g(0.0f, -98.0f, 0.0f);
         for (int i = 0 ; i < Ps.size() ; i++)
             Ps[i]->applyPermForce(Ps[i]->getMass() * g);
     }

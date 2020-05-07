@@ -61,14 +61,13 @@ C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(3
 C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(320,28): warning C4018: '<': signed/unsigned mismatch
 C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(330,28): warning C4018: '<': signed/unsigned mismatch
 C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\sph.h(341,28): warning C4018: '<': signed/unsigned mismatch
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(221,39): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(235,29): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(251,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(330,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(331,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(334,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(335,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(336,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(337,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(345,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(248,29): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(264,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(343,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(344,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(347,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(348,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(349,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(350,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Workspace\cse-291h-project\cse-291h-project\cse-291h-project\project2\main.cpp(358,31): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
   cse-291h-project.vcxproj -> C:\Workspace\cse-291h-project\cse-291h-project\Debug\cse-291h-project.exe

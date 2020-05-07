@@ -15,7 +15,7 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(vec3(0.0f, 3.0f, 23.0f));
+Camera camera(vec3(0.0f, 3.0f, 13.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -50,7 +50,7 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
     myShader.setMat4("model", model);
     myShader.setMat4("view", view);
     myShader.setVec3("fragColor", fragcolor);
-    myShader.setFloat("pointScale", 800.0);
+    myShader.setFloat("pointScale", 150.0);
     myShader.setFloat("pointRadius", 1.0);
 
     unsigned int VBO, VAO, EBO;
@@ -113,7 +113,7 @@ void display_acc(Shader myShader, float* accs, int len_accs) {
 }
 
 void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
-    vec3 half = {0.5, 0.5, 0.5};
+    vec3 half = {0, 0, 0};
     lb -= half;
     ub += half;
     float vertices[24] = {
@@ -218,18 +218,31 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
-    const float k               = 5e-4;
+    //const float k               = 1e-5;
+    //const float density0        = 1e3;
+    //const float supportRadius   = 3;
+    //const float smoothingRadius = 1.5;
+    //const float viscosity       = 0.5;
+    //const float penalty         = 1e7;
+    //const float m_d             = supportRadius;
+    //const vec3  pos(0, 1, 0);
+    //const vec3  size(12, 12, 12);
+    //const vec3  gap(0.4, 0.4, 0.4);
+    //const vec3  container_lb(-2, 0, -2);
+    //const vec3  container_ub(6, 11, 6);
+
+    const float k               = 1e4;
     const float density0        = 1e3;
-    const float supportRadius   = 3;
-    const float smoothingRadius = 1.5;
-    const float viscosity       = 5e-1;
-    const float penalty         = 1e6;
+    const float supportRadius   = 0.2f;
+    const float smoothingRadius = 0.1f;
+    const float viscosity       = 1.0f;
+    const float penalty         = 1e5;
     const float m_d             = supportRadius;
-    const vec3  pos(0, 1, 0);
+    const vec3  pos(0.5, 3, 0.5);
     const vec3  size(10, 10, 10);
-    const vec3  gap(0.5, 0.5, 0.5);
-    const vec3  container_lb(-1, -0.1, -1);
-    const vec3  container_ub(5.5, 11, 5.5);
+    const vec3  gap(0.08, 0.08, 0.08);
+    const vec3  container_lb(0, 0, 0);
+    const vec3  container_ub(2, 5, 2);
 
     SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius, viscosity);
     SPHIntegrator itg(0.999);
@@ -261,7 +274,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (!pause) {
-            deltaTime = 0.04f;
+            deltaTime = 5e-4f;
             totalTime += deltaTime;
             lastFrame = currentFrame;
 
