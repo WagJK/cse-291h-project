@@ -1,6 +1,7 @@
 #ifndef SPH_H
 #define SPH_H
 
+#include <omp.h>
 #include <vector>
 #include <cstdlib>
 #include <cmath> 
@@ -32,6 +33,7 @@ private:
     vec3 container_lb;
     vec3 container_ub;
     float k;
+    float g;
     float density0;
     float supportRadius;
     float smoothingRadius;
@@ -74,9 +76,9 @@ private:
 
 public:
     SPHSystem(vec3 pos, vec3 size, vec3 gap, float m_d, vec3 container_lb, vec3 container_ub, 
-        float penalty, float k, float density0, float supportRadius, float smoothingRadius, float viscosity) :
+        float g, float penalty, float k, float density0, float supportRadius, float smoothingRadius, float viscosity) :
         spos(pos), size(size), gap(gap), m_d(m_d), container_lb(container_lb), container_ub(container_ub),
-        penalty(penalty), k(k), density0(density0), supportRadius(supportRadius), smoothingRadius(smoothingRadius), viscosity(viscosity)
+        g(g), penalty(penalty), k(k), density0(density0), supportRadius(supportRadius), smoothingRadius(smoothingRadius), viscosity(viscosity)
     {
         this->table = new SpatialHashTable(m_d);
         float mass = pow(supportRadius / 2.0, 3) * density0; // pow(2.0 / 3.0 * smoothingRadius, 3) * density0;
@@ -86,10 +88,8 @@ public:
             for (int iy = 0; iy < size[1]; iy++) {
                 for (int iz = 0; iz < size[2]; iz++) {
                     vec3 ppos(gap[0] * ix, gap[1] * iy, gap[2] * iz);
-
                     if (distance(ppos, center) > (size.x - 1) * gap.x / 2 + 0.1) continue;
-
-                    vec3 rand(0.01 * rand() / RAND_MAX, 0.01 * rand() / RAND_MAX, 0.01 * rand() / RAND_MAX);
+                    vec3 rand(0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX);
                     ppos = ppos + pos + rand;
                     Ps.push_back(new Particle(ppos, mass));
                 }
@@ -100,13 +100,25 @@ public:
     void build() {
         table->clear();
         table->build(Ps);
-        for (int i = 0; i < Ps.size(); i++) computeNeighbors(Ps[i]);
-        for (int i = 0; i < Ps.size(); i++) computeBasics(Ps[i]);
-        for (int i = 0; i < Ps.size(); i++) computeForces(Ps[i]);
+        for (int i = 0; i < Ps.size(); i++)
+            computeNeighborBlocks(Ps[i]);
+#pragma omp parallel for
+        for (int i = 0; i < Ps.size(); i++) 
+            computeNeighbors(Ps[i]);
+#pragma omp parallel for
+        for (int i = 0; i < Ps.size(); i++) 
+            computeBasics(Ps[i]);
+#pragma omp parallel for
+        for (int i = 0; i < Ps.size(); i++) 
+            computeForces(Ps[i]);
+    }
+
+    void computeNeighborBlocks(Particle* p) {
+        table->neighborBlocks(p);
     }
 
     void computeNeighbors(Particle* p) {
-        table->neighbors(p, p->getNeighbors(false));
+        table->neighbors(p);
         p->setBuiltNeighborsFlag(true);
     }
 
@@ -116,6 +128,7 @@ public:
         vector<Particle*>* neighbors = p->getNeighbors(true);
         // compute density & pressure
         float dens = 0;
+#pragma omp parallel for reduction(+:dens)
         for (int j = 0; j < neighbors->size(); j++) {
             Particle* p_j = neighbors->at(j);
             dens += p_j->getMass() * W(p, p_j, smoothingRadius);
@@ -142,6 +155,7 @@ public:
             printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tdensity: %.2f\tpressure: %.2f\n",
                 tpos.x, tpos.y, tpos.z, mass, dens, pres);
         }
+#pragma omp parallel for
         for (int j = 0; j < neighbors->size(); j++) {
             Particle* p_j = neighbors->at(j);
             float mass_j = p_j->getMass();
@@ -175,6 +189,7 @@ public:
             printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tvel: %.2f-%.2f-%.2f\n",
                 tpos.x, tpos.y, tpos.z, mass, vel.x, vel.y, vel.z);
         }
+#pragma omp parallel for
         for (int j = 0; j < neighbors->size(); j++) {
             Particle* p_j = neighbors->at(j);
             float mass_j = p_j->getMass();
@@ -206,22 +221,26 @@ public:
     }
 
     void applyGForces() {
-        vec3 g(0.0f, -98.0f, 0.0f);
+        vec3 g(0.0f, -g, 0.0f);
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++)
             Ps[i]->applyPermForce(Ps[i]->getMass() * g);
     }
 
     void applyTempForces(vec3& f) {
+#pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++)
             Ps[i]->applyTempForce(f);
     }   
 
     void clearTempForces() {
+#pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++)
             Ps[i]->clearTempForce();
     }
 
     void applySPHForces() {
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             Ps[i]->applyTempForce(Ps[i]->getFpres());
             Ps[i]->applyTempForce(Ps[i]->getFvisc());
@@ -234,6 +253,7 @@ public:
     }
 
     void applyPenaltyForces() {
+#pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) {
             vec3 pos = Ps[i]->getPosition();
             if (pos.y <= container_lb.y) {
@@ -263,75 +283,33 @@ public:
         }
     }
 
-    void getAccelations(vector<vec3>& accs) {
-        accs.clear();
-        for (int i = 0; i < Ps.size(); i++)
-            accs.push_back(Ps[i]->computeAcceleration());
-    }
-
     int getSize() { return Ps.size(); }
-
-    int getNumDofs() { return getSize(); }
 
     vector<Particle*>* getParticles() { return &Ps; }
 
     void getPositions(float* pos) {
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             vec3 ppos = Ps[i]->getPosition();
             for (int j = 0 ; j < 3 ; j++) pos[3 * i + j] = ppos[j];
         }
     }
 
-    void getPositions(vector<vec3>& pos) {
-        pos.clear();
-        for (int i = 0 ; i < Ps.size() ; i++) 
-            pos.push_back(Ps[i]->getPosition());
-    }
-
     void getVelocities(float* vel) {
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             vec3 pvel = Ps[i]->getVelocity();
             for (int j = 0 ; j < 3 ; j++) vel[3 * i + j] = pvel[j];
         }
     }
 
-    void getVelocities(vector<vec3>& vel) {
-        vel.clear();
-        for (int i = 0 ; i < Ps.size() ; i++) 
-            vel.push_back(Ps[i]->getVelocity());
-    }
-
-    void setPositions(const vector<vec3>& pos) {
-        for (int i = 0 ; i < Ps.size() ; i++)
-            Ps[i]->setPosition(pos[i]);
-    }
-
-    void setVelocities(vec3& vel) {
-        for (int i = 0 ; i < Ps.size() ; i++)
-            Ps[i]->setVelocity(vel);
-    }
-
-    void setVelocities(const vector<vec3>& vel) {
-        for (int i = 0 ; i < Ps.size() ; i++)
-            Ps[i]->setVelocity(vel[i]);
-    }
-
     void getPosAcc(float* posacc) {
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             vec3 ppos = Ps[i]->getPosition();
             vec3 pacc = ppos + Ps[i]->computeTempAcceleration();
             for (int j = 0 ; j < 3 ; j++) posacc[6 * i + 0 + j] = ppos[j];
             for (int j = 0 ; j < 3 ; j++) posacc[6 * i + 3 + j] = pacc[j];
-        }
-    }
-
-    void getPosAcc(vector<vec3>& posacc) {
-        posacc.clear();
-        for (int i = 0 ; i < Ps.size() ; i++) {
-            vec3 ppos = Ps[i]->getPosition();
-            vec3 pacc = ppos + Ps[i]->computeTempAcceleration();
-            posacc.push_back(ppos);
-            posacc.push_back(ppos + pacc);
         }
     }
 

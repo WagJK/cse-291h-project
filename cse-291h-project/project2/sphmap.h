@@ -1,6 +1,7 @@
 #ifndef SPHMAP_H
 #define SPHMAP_H
 
+#include <omp.h>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -86,54 +87,37 @@ public:
         }
     }
 
-    void neighbors(Particle* p, float dist, vector<Particle*>* res) {
+    void neighborBlocks(Particle* p) {
+        auto res = p->getNeighborBlocks();
         res->clear();
         vec3 pos = p->getPosition();
-        if (LOG) printf("\tneighbors of %.0f-%.0f-%.0f: ", pos.x, pos.y, pos.z);
-        vec3 lb(pos.x - dist, pos.y - dist, pos.z - dist);
-        vec3 ub(pos.x + dist, pos.y + dist, pos.z + dist);
-        int3 lbh = int3_hash_func(lb), ubh = int3_hash_func(ub);
-        for (int ix = lbh.x; ix < ubh.x + 1; ix++) {
-            for (int iy = lbh.y; iy < ubh.y + 1; iy++) {
-                for (int iz = lbh.z; iz < ubh.z + 1; iz++) {
-                    int3 block_id(ix, iy, iz);
-                    vector<Particle*>* entry = hash_map[block_id.hash_func()];
-                    if (entry == NULL) continue;
-                    for (Particle* tp : *entry) {
-                        if (tp != p && distance(tp->getPosition(), pos) <= dist) {
-                            res->push_back(tp);
-                            vec3 tp_pos = tp->getPosition();
-                            if (LOG) printf("%.0f-%.0f-%.0f ", tp_pos.x, tp_pos.y, tp_pos.z);
-                        }
-                    }
-                }
-            }
-        } if (LOG) printf("\n");
-    }
-
-    void neighbors(Particle* p, vector<Particle*>* res) {
-        res->clear();
-        vec3 pos = p->getPosition();
-        if (LOG) printf("\tneighbors of %.0f-%.0f-%.0f: ", pos.x, pos.y, pos.z);
         int3 h = int3_hash_func(pos);
         for (int ix = h.x - 1; ix < h.x + 2; ix++) {
             for (int iy = h.y - 1; iy < h.y + 2; iy++) {
                 for (int iz = h.z - 1; iz < h.z + 2; iz++) {
                     int3 block_id(ix, iy, iz);
-                    vector<Particle*>* entry = hash_map[block_id.hash_func()];
-                    if (entry == NULL) continue;
-                    for (Particle* tp : *entry) {
-                        if (tp != p && distance(tp->getPosition(), pos) <= m_d) {
-                            res->push_back(tp);
-                            if (LOG) {
-                                vec3 tp_pos = tp->getPosition();
-                                printf("%.0f-%.0f-%.0f ", tp_pos.x, tp_pos.y, tp_pos.z);
-                            }
-                        }
-                    }
+                    auto entry = hash_map[block_id.hash_func()];
+                    if (entry != NULL) res->push_back(entry);
                 }
             }
-        } if (LOG) printf("\n");
+        }
+    }
+
+    void neighbors(Particle* p) {
+        auto res = p->getNeighbors(false);
+        res->clear();
+        vec3 pos = p->getPosition();
+        vector<vector<Particle*>*>* blocks = p->getNeighborBlocks();
+#pragma omp parallel for 
+        for (int i = 0; i < blocks->size(); i++) {
+            vector<Particle*>* entry = blocks->at(i);
+#pragma omp parallel for 
+            for (int j = 0; j < entry->size(); j++) {
+                if (entry->at(j) != p && distance(entry->at(j) ->getPosition(), pos) <= m_d)
+#pragma omp critical
+                    res->push_back(entry->at(j));
+            }
+        }
     }
 };
 

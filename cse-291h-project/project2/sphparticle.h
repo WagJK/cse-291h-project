@@ -25,6 +25,7 @@ private:
     vec3 Fpres;
     vec3 Fvisc;
     vector<Particle*>* neighbors;
+    vector<vector<Particle*>*>* neighborBlocks;
     bool flagBuiltBasics;
     bool flagBuiltForces;
     bool flagBuiltNeighbors;
@@ -42,6 +43,7 @@ public:
         Fvisc = { 0, 0, 0 };
         flagBuiltNeighbors = false;
         neighbors = new vector<Particle*>();
+        neighborBlocks = new vector<vector<Particle*>*>();
     }
 
     float getMass() { return mass; }
@@ -77,12 +79,12 @@ public:
     vec3 getVelocity() { return vel; }
     void setVelocity(vec3 vel) { this->vel = vel; }
 
-    void setNeighbors(vector<Particle*>* ps) { neighbors = ps; }
     vector<Particle*>* getNeighbors(bool check) {
         if (check && !flagBuiltNeighbors)
             throw "neighbors not built!";
         return neighbors;
     }
+    vector<vector<Particle*>*>* getNeighborBlocks() { return neighborBlocks; }
 
     void setBuiltBasicsFlag(bool flag) { this->flagBuiltBasics = flag; }
     void setBuiltForcesFlag(bool flag) { this->flagBuiltForces = flag; }

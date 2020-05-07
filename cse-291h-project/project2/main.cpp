@@ -11,11 +11,11 @@ using namespace std;
 using namespace glm;
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_WIDTH = 1080;
 const unsigned int SCR_HEIGHT = 1080;
 
 // camera
-Camera camera(vec3(0.0f, 3.0f, 13.0f));
+Camera camera(vec3(0.0f, 3.0f, 10.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -50,7 +50,7 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
     myShader.setMat4("model", model);
     myShader.setMat4("view", view);
     myShader.setVec3("fragColor", fragcolor);
-    myShader.setFloat("pointScale", 150.0);
+    myShader.setFloat("pointScale", 200.0);
     myShader.setFloat("pointRadius", 1.0);
 
     unsigned int VBO, VAO, EBO;
@@ -231,21 +231,23 @@ int main()
     //const vec3  container_lb(-2, 0, -2);
     //const vec3  container_ub(6, 11, 6);
 
-    const float k               = 1e4;
-    const float density0        = 1e3;
-    const float supportRadius   = 0.2f;
+    const float g = 800;
+    const float k = 1e4;
+    const float penalty = 1e6;
+    const float viscosity = 1.0f;
+    const float density0 = 1e3;
+    const float supportRadius = 0.2f;
     const float smoothingRadius = 0.1f;
-    const float viscosity       = 1.0f;
-    const float penalty         = 1e5;
-    const float m_d             = supportRadius;
-    const vec3  pos(0.5, 3, 0.5);
-    const vec3  size(10, 10, 10);
+    const float m_d = supportRadius;
+
+    const vec3  pos(0.6, 6, 0.6);
+    const vec3  size(16, 16, 16);
     const vec3  gap(0.08, 0.08, 0.08);
     const vec3  container_lb(0, 0, 0);
-    const vec3  container_ub(2, 5, 2);
+    const vec3  container_ub(3, 10, 3);
 
-    SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, penalty, k, density0, supportRadius, smoothingRadius, viscosity);
-    SPHIntegrator itg(0.999);
+    SPHSystem sph(pos, size, gap, m_d, container_lb, container_ub, g, penalty, k, density0, supportRadius, smoothingRadius, viscosity);
+    SPHIntegrator itg(1);
     
     float* vertices = new float[3 * sph.getSize()];
     float* accs     = new float[6 * sph.getSize()];
