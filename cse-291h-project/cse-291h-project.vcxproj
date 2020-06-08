@@ -20,31 +20,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
-    <ClCompile Include="project1\main.cpp" />
-    <ClCompile Include="project1\concreteblockintegrator.h" />
-    <ClCompile Include="project2\main.cpp" />
+    <ClCompile Include="project3\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project1\shader\fragment.shader" />
-    <None Include="project1\shader\vertex.shader" />
-    <None Include="project2\shader\line_fragment.shader" />
-    <None Include="project2\shader\line_vertex.shader" />
-    <None Include="project2\shader\sphere_fragment.shader" />
-    <None Include="project2\shader\sphere_vertex.shader" />
+    <None Include="project3\shader\fluid_fragment.shader" />
+    <None Include="project3\shader\fluid_vertex.shader" />
+    <None Include="project3\shader\line_fragment.shader" />
+    <None Include="project3\shader\line_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="project1\camera.h" />
-    <ClInclude Include="project1\concreteblock.h" />
-    <ClInclude Include="project1\particle.h" />
-    <ClInclude Include="project1\shader.h" />
-    <ClInclude Include="project1\tetrahedron.h" />
-    <ClInclude Include="project2\camera.h" />
-    <ClInclude Include="project2\sphmap.h" />
-    <ClInclude Include="project2\sphparticle.h" />
-    <ClInclude Include="project2\shader.h" />
-    <ClInclude Include="project2\sph.h" />
-    <ClInclude Include="project2\sphintegrator.h" />
-    <ClInclude Include="project2\sphnaive.h" />
+    <ClInclude Include="project3\camera.h" />
+    <ClInclude Include="project3\polygonoise.h" />
+    <ClInclude Include="project3\shader.h" />
+    <ClInclude Include="project3\sph.h" />
+    <ClInclude Include="project3\sphgrid.h" />
+    <ClInclude Include="project3\sphintegrator.h" />
+    <ClInclude Include="project3\sphmap.h" />
+    <ClInclude Include="project3\sphparticle.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -125,6 +117,10 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <OpenMPSupport>true</OpenMPSupport>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

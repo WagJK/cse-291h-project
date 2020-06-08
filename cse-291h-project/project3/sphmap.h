@@ -40,6 +40,10 @@ struct int3 {
     int hash_func() const {
         return ((x + MAX_BID) << (2 * LFT_BID)) + ((y + MAX_BID) << LFT_BID) + (z + MAX_BID);
     }
+
+    int3 operator+(int3 const& a) {
+        return int3(x + a.x, y + a.y, z + a.z);
+    }
 };
 
 class SpatialHashTable {
@@ -87,7 +91,7 @@ public:
         }
     }
 
-    void neighborBlocks(Particle* p) {
+    void computeNeighborBlocks(Particle* p) {
         auto res = p->getNeighborBlocks();
         res->clear();
         vec3 pos = p->getPosition();
@@ -103,12 +107,12 @@ public:
         }
     }
 
-    void neighbors(Particle* p) {
+    void computeNeighbors(Particle* p) {
         auto res = p->getNeighbors(false);
         res->clear();
         vec3 pos = p->getPosition();
         vector<vector<Particle*>*>* blocks = p->getNeighborBlocks();
-// #pragma omp parallel for 
+#pragma omp parallel for 
         for (int i = 0; i < blocks->size(); i++) {
             vector<Particle*>* entry = blocks->at(i);
 #pragma omp parallel for 
