@@ -26,7 +26,8 @@ private:
     int imax, jmax, kmax;
     vec3 lb, ub;
     float g_d, smtRadius;
-    float* densityTable;
+
+    float* densityTable; vec3* normTable;
     Particle** gridPs;
 
     float f(float q) {
@@ -91,14 +92,15 @@ public:
         this->kmax = (ub.z - lb.z) / g_d + 1;
 
         densityTable = new float[imax * jmax * kmax];
+        normTable = new vec3[imax * jmax * kmax];
         gridPs = new Particle * [imax * jmax * kmax];
         for (int i = 0; i < imax * jmax * kmax; i++) {
             int3 xyz = index2XYZ(i);
             vec3 pos = XYZ2Pos(xyz);
 
-            // printf("%f %f %f\n", xyz.x, xyz.y, xyz.z);
             gridPs[i] = new Particle(pos, 0.0f);
             densityTable[i] = 0.0f;
+            normTable[i] = vec3(0.0f, 0.0f, 0.0f);
         }
     }
 
@@ -113,44 +115,50 @@ public:
         }
         #pragma omp parallel for
         for (int i = 0; i < imax * jmax * kmax; i++) {
-            float dens = 0;
+            float dens = 0; vec3 norm(0, 0, 0);
             vector<Particle*>* neighbors = gridPs[i]->getNeighbors(true);
             #pragma omp parallel for reduction(+:dens)
             for (int j = 0; j < neighbors->size(); j++) {
                 Particle* p_j = neighbors->at(j);
                 dens += p_j->getMass() * W(gridPs[i], p_j);
+                norm += p_j->getMass() * dW(gridPs[i], p_j);
             }
             densityTable[i] = dens;
+            normTable[i] = -norm;
         }
     }
 
     int computeTriangleFacets(float* res, float isolevel) {
 
-        vector<float> temp;
+        vector<vec3> temp;
         int numTriangle = 0;
+        int cube_edgeToVerts[12][2] = {
+            {0,1}, {1,2}, {2,3}, {3,0},
+            {4,5}, {5,6}, {6,7}, {7,4},
+            {0,4}, {1,5}, {2,6}, {3,7},
+        };
 
         for (int i = 0 ; i < imax * jmax * kmax ; i++) {
             int3 xyz = index2XYZ(i);
             vec3 pos = XYZ2Pos(xyz);
             if (xyz.x == imax - 1 || xyz.y == jmax - 1 || xyz.z == kmax - 1) continue;
-
+            
             int3 indices[8] = {
                 xyz + int3(0,0,0), xyz + int3(0,1,0), xyz + int3(1,1,0), xyz + int3(1,0,0),
                 xyz + int3(0,0,1), xyz + int3(0,1,1), xyz + int3(1,1,1), xyz + int3(1,0,1)
             };
-            float dens[8]; vec3 poss[8];
+            float dens[8]; vec3 poss[8]; vec3 norm[8];
             for (int j = 0 ; j < 8 ; j++) {
                 poss[j] = XYZ2Pos(indices[j]);
                 dens[j] = densityTable[XYZ2Index(indices[j])];
+                norm[j] = normTable[XYZ2Index(indices[j])];
             }
-            GRIDCELL grid = {
-                {poss[0], poss[1], poss[2], poss[3], poss[4], poss[5], poss[6], poss[7]},
-                {dens[0], dens[1], dens[2], dens[3], dens[4], dens[5], dens[6], dens[7]},
-            };
-            numTriangle += Polygonise(grid, isolevel, &temp);
+            numTriangle += Polygonise(poss, norm, dens, isolevel, &temp);
         }
         for (int i = 0; i < temp.size(); i++) {
-            res[i] = temp[i];
+            res[3 * i + 0] = temp[i].x;
+            res[3 * i + 1] = temp[i].y;
+            res[3 * i + 2] = temp[i].z;
         }
         return numTriangle;
     }

@@ -16,6 +16,7 @@ using namespace glm;
 // settings
 const unsigned int SCR_WIDTH = 1080;
 const unsigned int SCR_HEIGHT = 1080;
+vec3 lightPos(2.0f, 10.0f, 2.0f);
 
 // camera
 Camera camera(vec3(0.0f, 3.0f, 10.0f));
@@ -47,7 +48,7 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     mat4 view = camera.GetViewMatrix();
     mat4 model = mat4(1.0f);
-    vec3 fragcolor(0.2f, 0.2f, 0.6f);
+    vec3 fragcolor(1.0f, 1.0f, 1.0f);
 
     myShader.setMat4("projection", projection);
     myShader.setMat4("model", model);
@@ -78,28 +79,32 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
 
 void display_sph_triangle(Shader myShader, float* vertices, int len_vertices) {
     myShader.use();
+    myShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    myShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    myShader.setVec3("lightPos", lightPos);
+
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     mat4 view = camera.GetViewMatrix();
-    mat4 model = mat4(1.0f);
-    vec3 fragcolor(0.2f, 0.2f, 0.6f);
-
     myShader.setMat4("projection", projection);
-    myShader.setMat4("model", model);
     myShader.setMat4("view", view);
-    myShader.setVec3("fragColor", fragcolor);
-    myShader.setFloat("pointScale", 200.0);
-    myShader.setFloat("pointRadius", 1.0);
 
-    unsigned int VBO, VAO, EBO;
+    mat4 model = mat4(1.0f);
+    myShader.setMat4("model", model);
+
+    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, len_vertices * sizeof(float), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, len_vertices);
@@ -107,7 +112,6 @@ void display_sph_triangle(Shader myShader, float* vertices, int len_vertices) {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 }
 
 void display_acc(Shader myShader, float* accs, int len_accs) {
@@ -253,7 +257,7 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
-    const float g = 980;
+    const float g = 800;
     const float k = 1e4;
     const float penalty = 1e6;
     const float viscosity = 1.0f;
@@ -263,14 +267,16 @@ int main()
     const float m_d = supportRadius;
     const float g_d = supportRadius / 2.0;
 
-    const vec3  pos(0.6, 6, 0.6);
+    const vec3  pos(0.6, 0.6, 0.6);
+    const vec3  vel(0.0, -30.0, 0.0);
     const vec3  size(16, 16, 16);
     const vec3  gap(0.08, 0.08, 0.08);
     const vec3  container_lb(0, 0, 0);
-    const vec3  container_ub(3, 10, 3);
+    const vec3  container_ub(3, 3, 3);
+    lightPos = { 1.5f, 3.0f, 3.0f };
 
     SPHSystem sph(
-        pos, size, gap, m_d, g_d,
+        pos, vel, size, gap, m_d, g_d,
         container_lb, container_ub, 
         g, penalty, k, density0, 
         supportRadius, smoothingRadius, viscosity,
@@ -278,7 +284,7 @@ int main()
     );
     SPHIntegrator itg(1);
     
-    float* vertices = new float[100000];
+    float* vertices = new float[1000000];
     float* accs     = new float[6 * sph.getSize()];
 
     sph.getPositions(vertices); 
@@ -287,17 +293,14 @@ int main()
     // render loop
     // -----------
     int cnt = 0;
+    float physicsTime = 0.0f, renderTime = 0.0f;
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
         // --------------------
-        float currentFrame = glfwGetTime();
-        // deltaTime = currentFrame- lastFrame;
-
         // input
         // -----
         processInput(window);
-
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -306,14 +309,16 @@ int main()
         if (!pause) {
             deltaTime = 5e-4f;
             totalTime += deltaTime;
-            lastFrame = currentFrame;
+
+            float t1 = glfwGetTime();
 
             sph.build();
             sph.clearTempForces();
             sph.applySPHForces();
-
             sph.applyPenaltyForces();
             itg.integrate(sph, deltaTime);
+
+            float t2 = glfwGetTime();
 
             // sph.getPosAcc(accs);
             // sph.getPositions(vertices);
@@ -323,7 +328,15 @@ int main()
 
             int length = sph.getTriangleFacets(vertices, 15);
             display_ctn(lineShader, container_lb, container_ub);
-            display_sph_triangle(lineShader, vertices, 9 * length);
+            // display_sph(lineShader, vertices, 2 * 9 * length);
+            display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
+
+            float t3 = glfwGetTime();
+
+            physicsTime += t2 - t1;
+            renderTime + t3 - t2;
+        
+            printf("physics: %.4fs\trender: %.4fs\n", physicsTime, renderTime);
         }
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

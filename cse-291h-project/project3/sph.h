@@ -4,7 +4,8 @@
 #include <omp.h>
 #include <vector>
 #include <cstdlib>
-#include <cmath> 
+#include <cmath>
+#include <ctime>
 #include <glm/vec3.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/geometric.hpp>
@@ -89,7 +90,7 @@ private:
     }
 
 public:
-    SPHSystem(vec3 pos, vec3 size, vec3 gap, float m_d, float g_d,
+    SPHSystem(vec3 pos, vec3 vel, vec3 size, vec3 gap, float m_d, float g_d,
         vec3 container_lb, vec3 container_ub, 
         float g, float penalty, float k, float density0, 
         float sptRadius, float smtRadius, float viscosity,
@@ -115,7 +116,9 @@ public:
                     if (distance(ppos, center) > (size.x - 1) * gap.x / 2 + 0.1) continue;
                     vec3 rand(0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX);
                     ppos = ppos + pos + rand;
-                    Ps.push_back(new Particle(ppos, mass));
+                    Particle* p = new Particle(ppos, mass);
+                    p->setVelocity(vel);
+                    Ps.push_back(p);
                 }
             }
         }
@@ -124,22 +127,44 @@ public:
     void build() {
         table->clear();
         table->build(Ps);
+
+        struct timespec t1, t2, t3, t4, t5;
+        timespec_get(&t1, TIME_UTC);
+
         for (int i = 0; i < Ps.size(); i++)
             computeNeighborBlocks(Ps[i]);
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) 
             computeNeighbors(Ps[i]);
-#pragma omp parallel for
+
+        timespec_get(&t2, TIME_UTC);
+
+        #pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) 
             computeBasics(Ps[i]);
-#pragma omp parallel for
+
+        timespec_get(&t3, TIME_UTC);
+
+        #pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) 
             computeForces(Ps[i]);
-// #pragma omp parallel for
+
+        timespec_get(&t4, TIME_UTC);
+
+//         #pragma omp parallel for
 //         for (int i = 0; i < Ps.size(); i++) 
 //             computeDiffuseTAPotential(Ps[i]);
 
          grid->computeDensityTable(table);
+
+         timespec_get(&t5, TIME_UTC);
+
+         printf("physics timer: %.3f\t:\t%.3f\t:\t%.3f\t:\t%.3f\n",
+             (t2.tv_nsec - t1.tv_nsec) / 1000000.0f,
+             (t3.tv_nsec - t2.tv_nsec) / 1000000.0f,
+             (t4.tv_nsec - t3.tv_nsec) / 1000000.0f,
+             (t5.tv_nsec - t4.tv_nsec) / 1000000.0f
+         );
     }
 
     void computeNeighborBlocks(Particle* p) {
