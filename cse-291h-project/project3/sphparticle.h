@@ -20,84 +20,22 @@ private:
     vec3 permF;
     vec3 tempF;
     float mass;
-    float dens;
-    float pres;
-    vec3 Fpres;
-    vec3 Fvisc;
-
-    vector<Particle*>* neighbors;
-    vector<vector<Particle*>*>* neighborBlocks;
-
-    float diffusePotential;
-    
-    bool flagBuiltBasics;
-    bool flagBuiltForces;
-    bool flagBuiltNeighbors;
 
 public:
     Particle(vec3 pos, float mass) : pos(pos), mass(mass) {
         vel *= 0;
         tempF *= 0;
         permF *= 0;
-        flagBuiltBasics = false;
-        dens = 0;
-        pres = 0;
-        flagBuiltForces = false;
-        Fpres = { 0, 0, 0 };
-        Fvisc = { 0, 0, 0 };
-        flagBuiltNeighbors = false;
-        neighbors = new vector<Particle*>();
-        neighborBlocks = new vector<vector<Particle*>*>();
-
-        diffusePotential = 0;
     }
 
     float getMass() { return mass; }
     void setMass(float mass) { this->mass = mass; }
-
-    float getDensity() { 
-        if (!flagBuiltBasics) throw "basics not built!";
-        return dens; 
-    }
-    void setDensity(float dens) { this->dens = dens; }
-
-    float getPressure() {
-        if (!flagBuiltBasics) throw "basics not built!"; 
-        return pres; 
-    }
-    void setPressure(float pres) { this->pres = pres; }
-
-    vec3 getFpres() {
-        if (!flagBuiltForces) throw "forces not built!";
-        return Fpres;
-    }
-    void setFpres(vec3 Fpres) { this->Fpres = Fpres; }
-
-    vec3 getFvisc() {
-        if (!flagBuiltForces) throw "forces not built!";
-        return Fvisc;
-    }
-    void setFvisc(vec3 Fvisc) { this->Fvisc = Fvisc; }
 
     vec3 getPosition() { return pos; }
     void setPosition(vec3 pos) { this->pos = pos; }
 
     vec3 getVelocity() { return vel; }
     void setVelocity(vec3 vel) { this->vel = vel; }
-
-    float getDiffusePotential() { return diffusePotential; }
-    void setDiffusePotential(float diffusePotential) { this->diffusePotential = diffusePotential; }
-
-    vector<Particle*>* getNeighbors(bool check) {
-        if (check && !flagBuiltNeighbors)
-            throw "neighbors not built!";
-        return neighbors;
-    }
-    vector<vector<Particle*>*>* getNeighborBlocks() { return neighborBlocks; }
-
-    void setBuiltBasicsFlag(bool flag) { this->flagBuiltBasics = flag; }
-    void setBuiltForcesFlag(bool flag) { this->flagBuiltForces = flag; }
-    void setBuiltNeighborsFlag(bool flag) { this->flagBuiltNeighbors = flag; }
 
     void clearTempForce() { tempF *= 0; }
     void clearPermForce() { permF *= 0; }
@@ -115,4 +53,112 @@ public:
     }
 };
 
+class FluidParticle : public Particle {
+private:
+    float dens;
+    vec3 norm;
+    float pres;
+    vec3 Fpres;
+    vec3 Fvisc;
+
+    vector<FluidParticle*>* neighbors;
+    vector<vector<FluidParticle*>*>* neighborBlocks;
+
+    float v_diff, kv, Ek;
+    bool flagBuiltBasics;
+    bool flagBuiltForces;
+    bool flagBuiltNeighbors;
+
+public:
+    FluidParticle(vec3 pos, float mass) : Particle(pos, mass) {
+        flagBuiltBasics = false;
+        dens = 0;
+        norm = { 0, 0, 0 };
+        pres = 0;
+        
+        flagBuiltForces = false;
+        Fpres = { 0, 0, 0 };
+        Fvisc = { 0, 0, 0 };
+        
+        flagBuiltNeighbors = false;
+        neighbors = new vector<FluidParticle*>();
+        neighborBlocks = new vector<vector<FluidParticle*>*>();
+        
+        v_diff = 0; kv = 0; Ek = 0;
+    }
+
+    float getDensity() {
+        if (!flagBuiltBasics) throw "basics not built!";
+        return dens;
+    }
+    void setDensity(float dens) { this->dens = dens; }
+
+    vec3 getNormal() {
+        if (!flagBuiltBasics) throw "basics not built";
+        return norm;
+    }
+    void setNormal(vec3 norm) { this->norm = norm; }
+
+    float getPressure() {
+        if (!flagBuiltBasics) throw "basics not built!";
+        return pres;
+    }
+    void setPressure(float pres) { this->pres = pres; }
+
+    vec3 getFpres() {
+        if (!flagBuiltForces) throw "forces not built!";
+        return Fpres;
+    }
+    void setFpres(vec3 Fpres) { this->Fpres = Fpres; }
+
+    vec3 getFvisc() {
+        if (!flagBuiltForces) throw "forces not built!";
+        return Fvisc;
+    }
+    void setFvisc(vec3 Fvisc) { this->Fvisc = Fvisc; }
+
+    vec3 getDiffusePotential() { return vec3(v_diff, kv, Ek); }
+    void setDiffusePotential(float vi_diff, float ki, float Eki) {
+        this->v_diff = vi_diff;
+        this->kv = ki;
+        this->Ek = Eki;
+    }
+
+    vector<FluidParticle*>* getNeighbors(bool check) {
+        if (check && !flagBuiltNeighbors)
+            throw "neighbors not built!";
+        return neighbors;
+    }
+    vector<vector<FluidParticle*>*>* getNeighborBlocks() { return neighborBlocks; }
+
+    void setBuiltBasicsFlag(bool flag) { this->flagBuiltBasics = flag; }
+    void setBuiltForcesFlag(bool flag) { this->flagBuiltForces = flag; }
+    void setBuiltNeighborsFlag(bool flag) { this->flagBuiltNeighbors = flag; }
+
+};
+
+class DiffuseParticle : public FluidParticle {
+
+private:
+    int lifetime;
+    int diffuseType; // 0 - Fluid ; 1 - Spray ; 2 - Foam ; 3 - Bubble
+
+public:
+    const static int TYPE_SPRY = 1;
+    const static int TYPE_FOAM = 2;
+    const static int TYPE_BUBB = 3;
+
+    DiffuseParticle(vec3 pos, float mass, int type, int lifetime) : FluidParticle(pos, mass) {
+        this->diffuseType = type;
+        this->lifetime = lifetime;
+    }
+
+    void setDiffuseType(int type) { diffuseType = type; }
+    int getDiffuseType() { return diffuseType; }
+
+    bool reduceLifetime() {
+        lifetime--;
+        return (lifetime <= 0);
+    }
+};
 #endif

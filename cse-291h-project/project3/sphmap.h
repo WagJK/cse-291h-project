@@ -50,7 +50,7 @@ class SpatialHashTable {
 
 private:
     float m_d;
-    unordered_map<int, vector<Particle*>*> hash_map;
+    unordered_map<int, vector<FluidParticle*>*> hash_map;
 
     int hash_func(vec3 pos) {
         int3 ret(pos.x / m_d, pos.y / m_d, pos.z / m_d);
@@ -78,20 +78,20 @@ public:
         hash_map.clear();
     }
 
-    void build(vector<Particle*> ps) {
+    void build(vector<FluidParticle*> ps) {
         clear();
-        for (Particle* p : ps) {
+        for (FluidParticle* p : ps) {
             p->setBuiltBasicsFlag(false);
             p->setBuiltForcesFlag(false);
             p->setBuiltNeighborsFlag(false);
             int h = hash_func(p->getPosition());
             if (hash_map.find(h) == hash_map.end() || hash_map[h] == NULL)
-                hash_map[h] = new vector<Particle*>();
+                hash_map[h] = new vector<FluidParticle*>();
             hash_map[h]->push_back(p);
         }
     }
 
-    void computeNeighborBlocks(Particle* p) {
+    void computeNeighborBlocks(FluidParticle* p) {
         auto res = p->getNeighborBlocks();
         res->clear();
         vec3 pos = p->getPosition();
@@ -107,14 +107,14 @@ public:
         }
     }
 
-    void computeNeighbors(Particle* p) {
+    void computeNeighbors(FluidParticle* p) {
         auto res = p->getNeighbors(false);
         res->clear();
         vec3 pos = p->getPosition();
-        vector<vector<Particle*>*>* blocks = p->getNeighborBlocks();
+        vector<vector<FluidParticle*>*>* blocks = p->getNeighborBlocks();
 #pragma omp parallel for 
         for (int i = 0; i < blocks->size(); i++) {
-            vector<Particle*>* entry = blocks->at(i);
+            vector<FluidParticle*>* entry = blocks->at(i);
 #pragma omp parallel for 
             for (int j = 0; j < entry->size(); j++) {
                 if (entry->at(j) != p && distance(entry->at(j) ->getPosition(), pos) <= m_d)

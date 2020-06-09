@@ -28,7 +28,7 @@ private:
     float g_d, smtRadius;
 
     float* densityTable; vec3* normTable;
-    Particle** gridPs;
+    FluidParticle** gridPs;
 
     float f(float q) {
         float ans;
@@ -52,12 +52,12 @@ private:
         return ans * 3.0 / 2.0 / PI;
     }
 
-    float W(Particle* x_i, Particle* x_j) {
+    float W(FluidParticle* x_i, FluidParticle* x_j) {
         float q = distance(x_i->getPosition(), x_j->getPosition()) / smtRadius;
         return 1.0 / pow(smtRadius, 3) * f(q);
     }
 
-    vec3 dW(Particle* x_i, Particle* x_j) {
+    vec3 dW(FluidParticle* x_i, FluidParticle* x_j) {
         float q = distance(x_i->getPosition(), x_j->getPosition()) / smtRadius;
         vec3 norm = x_i->getPosition() - x_j->getPosition();
         norm = norm / sqrt(dot(norm, norm));
@@ -93,12 +93,12 @@ public:
 
         densityTable = new float[imax * jmax * kmax];
         normTable = new vec3[imax * jmax * kmax];
-        gridPs = new Particle * [imax * jmax * kmax];
+        gridPs = new FluidParticle * [imax * jmax * kmax];
         for (int i = 0; i < imax * jmax * kmax; i++) {
             int3 xyz = index2XYZ(i);
             vec3 pos = XYZ2Pos(xyz);
 
-            gridPs[i] = new Particle(pos, 0.0f);
+            gridPs[i] = new FluidParticle(pos, 0.0f);
             densityTable[i] = 0.0f;
             normTable[i] = vec3(0.0f, 0.0f, 0.0f);
         }
@@ -116,10 +116,10 @@ public:
         #pragma omp parallel for
         for (int i = 0; i < imax * jmax * kmax; i++) {
             float dens = 0; vec3 norm(0, 0, 0);
-            vector<Particle*>* neighbors = gridPs[i]->getNeighbors(true);
+            vector<FluidParticle*>* neighbors = gridPs[i]->getNeighbors(true);
             #pragma omp parallel for reduction(+:dens)
             for (int j = 0; j < neighbors->size(); j++) {
-                Particle* p_j = neighbors->at(j);
+                FluidParticle* p_j = neighbors->at(j);
                 dens += p_j->getMass() * W(gridPs[i], p_j);
                 norm += p_j->getMass() * dW(gridPs[i], p_j);
             }

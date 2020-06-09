@@ -26,8 +26,6 @@ bool firstMouse = true;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
-float totalTime = 0.0f;
-float lastFrame = 0.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -267,22 +265,25 @@ int main()
     const float m_d = supportRadius;
     const float g_d = supportRadius / 2.0;
 
+    const float kdiffuse = 1.0f;
+    const float kb = 1.0f, kd = 1.0f;
+
     const vec3  pos(0.6, 0.6, 0.6);
     const vec3  vel(0.0, -30.0, 0.0);
     const vec3  size(16, 16, 16);
     const vec3  gap(0.08, 0.08, 0.08);
     const vec3  container_lb(0, 0, 0);
     const vec3  container_ub(3, 3, 3);
+
     lightPos = { 1.5f, 3.0f, 3.0f };
+    deltaTime = 5e-4f;
 
     SPHSystem sph(
-        pos, vel, size, gap, m_d, g_d,
+        pos, vel, size, gap, deltaTime, m_d, g_d,
         container_lb, container_ub, 
         g, penalty, k, density0, 
-        supportRadius, smoothingRadius, viscosity,
-        0.0f, 0.0f
+        supportRadius, smoothingRadius, viscosity, kdiffuse, kb, kd
     );
-    SPHIntegrator itg(1);
     
     float* vertices = new float[1000000];
     float* accs     = new float[6 * sph.getSize()];
@@ -307,29 +308,24 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         if (!pause) {
-            deltaTime = 5e-4f;
-            totalTime += deltaTime;
-
             float t1 = glfwGetTime();
 
             sph.build();
             sph.clearTempForces();
             sph.applySPHForces();
             sph.applyPenaltyForces();
-            itg.integrate(sph, deltaTime);
+            sph.integrate();
 
             float t2 = glfwGetTime();
 
-            // sph.getPosAcc(accs);
-            // sph.getPositions(vertices);
-            // display_ctn(lineShader, container_lb, container_ub - shrink);
-            // display_sph(fluidShader, vertices, 3 * sph.getSize());
-            // display_acc(lineShader, accs,  6 * sph.getSize());
-
             int length = sph.getTriangleFacets(vertices, 15);
             display_ctn(lineShader, container_lb, container_ub);
-            // display_sph(lineShader, vertices, 2 * 9 * length);
             display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
+
+            // sph.getPosAcc(accs);
+            // sph.getPositions(vertices);
+            // display_sph(fluidShader, vertices, 3 * sph.getSize());
+            // display_acc(lineShader, accs,  6 * sph.getSize());
 
             float t3 = glfwGetTime();
 
