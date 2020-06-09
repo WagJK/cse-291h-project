@@ -39,6 +39,10 @@
     <None Include="project3\shader\fluid_vertex.shader" />
     <None Include="project3\shader\line_fragment.shader" />
     <None Include="project3\shader\line_vertex.shader" />
+    <None Include="project2\shader\sphere_fragment.shader" />
+    <None Include="project2\shader\sphere_vertex.shader" />
+    <None Include="project3\shader\sphere_fragment.shader" />
+    <None Include="project3\shader\sphere_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="project3\camera.h">
@@ -50,19 +54,16 @@
     <ClInclude Include="project3\sph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="project3\sphintegrator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="project3\sphmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="project3\sphparticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="project3\polygonoise.h">
+    <ClInclude Include="project3\sphgrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="project3\sphgrid.h">
+    <ClInclude Include="project3\marching_cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

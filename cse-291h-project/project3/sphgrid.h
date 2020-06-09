@@ -15,7 +15,7 @@
 #include "sphparticle.h"
 #include "sphmap.h"
 #include "sphparticle.h"
-#include "polygonoise.h"
+#include "marching_cube.h"
 
 #define PI 3.14159265358979323846264338327950288
 
@@ -113,11 +113,9 @@ public:
             hashTable->computeNeighbors(gridPs[i]);
             gridPs[i]->setBuiltNeighborsFlag(true);
         }
-        #pragma omp parallel for
         for (int i = 0; i < imax * jmax * kmax; i++) {
             float dens = 0; vec3 norm(0, 0, 0);
             vector<FluidParticle*>* neighbors = gridPs[i]->getNeighbors(true);
-            #pragma omp parallel for reduction(+:dens)
             for (int j = 0; j < neighbors->size(); j++) {
                 FluidParticle* p_j = neighbors->at(j);
                 dens += p_j->getMass() * W(gridPs[i], p_j);

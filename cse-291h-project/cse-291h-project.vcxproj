@@ -23,18 +23,21 @@
     <ClCompile Include="project3\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="project2\shader\sphere_fragment.shader" />
+    <None Include="project2\shader\sphere_vertex.shader" />
     <None Include="project3\shader\fluid_fragment.shader" />
     <None Include="project3\shader\fluid_vertex.shader" />
     <None Include="project3\shader\line_fragment.shader" />
     <None Include="project3\shader\line_vertex.shader" />
+    <None Include="project3\shader\sphere_fragment.shader" />
+    <None Include="project3\shader\sphere_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="project3\camera.h" />
-    <ClInclude Include="project3\polygonoise.h" />
+    <ClInclude Include="project3\marching_cube.h" />
     <ClInclude Include="project3\shader.h" />
     <ClInclude Include="project3\sph.h" />
     <ClInclude Include="project3\sphgrid.h" />
-    <ClInclude Include="project3\sphintegrator.h" />
     <ClInclude Include="project3\sphmap.h" />
     <ClInclude Include="project3\sphparticle.h" />
   </ItemGroup>

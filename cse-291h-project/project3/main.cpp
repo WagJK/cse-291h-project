@@ -8,7 +8,6 @@
 #include "shader.h"
 #include "camera.h"
 #include "sph.h"
-#include "sphintegrator.h"
 
 using namespace std;
 using namespace glm;
@@ -19,7 +18,7 @@ const unsigned int SCR_HEIGHT = 1080;
 vec3 lightPos(2.0f, 10.0f, 2.0f);
 
 // camera
-Camera camera(vec3(0.0f, 3.0f, 10.0f));
+Camera camera(vec3(0.0f, 0.0f, 10.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -41,18 +40,17 @@ void checkGLerrors() {
         std::cout << err;
 }
 
-void display_sph(Shader myShader, float* vertices, int len_vertices) {
+void display_sph(Shader myShader, float* vertices, int len_vertices, vec3 color) {
     myShader.use();
     mat4 projection = perspective(radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
     mat4 view = camera.GetViewMatrix();
     mat4 model = mat4(1.0f);
-    vec3 fragcolor(1.0f, 1.0f, 1.0f);
 
     myShader.setMat4("projection", projection);
     myShader.setMat4("model", model);
     myShader.setMat4("view", view);
-    myShader.setVec3("fragColor", fragcolor);
-    myShader.setFloat("pointScale", 200.0);
+    myShader.setVec3("fragColor", color);
+    myShader.setFloat("pointScale", 100.0);
     myShader.setFloat("pointRadius", 1.0);
 
     unsigned int VBO, VAO, EBO;
@@ -77,7 +75,7 @@ void display_sph(Shader myShader, float* vertices, int len_vertices) {
 
 void display_sph_triangle(Shader myShader, float* vertices, int len_vertices) {
     myShader.use();
-    myShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    myShader.setVec3("objectColor", 0.3f, 0.3f, 1.0f);
     myShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
     myShader.setVec3("lightPos", lightPos);
 
@@ -204,6 +202,7 @@ void display_ctn(Shader myShader, vec3 lb, vec3 ub) {
 }
 
 bool pause = true;
+
 int main()
 {
     // glfw: initialize and configure
@@ -250,23 +249,25 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader fluidShader ("project3/shader/fluid_vertex.shader", "project3/shader/fluid_fragment.shader");
-    Shader lineShader   ("project3/shader/line_vertex.shader",  "project3/shader/line_fragment.shader");
+    Shader fluidShader  ("project3/shader/fluid_vertex.shader",     "project3/shader/fluid_fragment.shader");
+    Shader lineShader   ("project3/shader/line_vertex.shader",      "project3/shader/line_fragment.shader");
+    Shader sphereShader ("project3/shader/sphere_vertex.shader",    "project3/shader/sphere_fragment.shader");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
     const float g = 800;
     const float k = 1e4;
     const float penalty = 1e6;
-    const float viscosity = 1.0f;
+    const float viscosity = 7e-3f;
     const float density0 = 1e3;
-    const float supportRadius = 0.2f;
-    const float smoothingRadius = 0.1f;
-    const float m_d = supportRadius;
-    const float g_d = supportRadius / 2.0;
+    const float sptRadius = 0.2f;
+    const float smtRadius = 0.1f;
+    const float m_d = sptRadius;
+    const float g_d = sptRadius / 2.0;
 
-    const float kdiffuse = 1.0f;
-    const float kb = 1.0f, kd = 1.0f;
+    const float kdiffuse = 3e3;
+    const float kb = 20, kd = 1.0f;
+    const vec3  Imax(70000.0f, 1500.0f, 500.f);
 
     const vec3  pos(0.6, 0.6, 0.6);
     const vec3  vel(0.0, -30.0, 0.0);
@@ -281,12 +282,13 @@ int main()
     SPHSystem sph(
         pos, vel, size, gap, deltaTime, m_d, g_d,
         container_lb, container_ub, 
-        g, penalty, k, density0, 
-        supportRadius, smoothingRadius, viscosity, kdiffuse, kb, kd
+        g, penalty, 1.0f, k, density0, 
+        sptRadius, smtRadius, viscosity, 
+        kdiffuse, kb, kd, Imax
     );
     
-    float* vertices = new float[1000000];
-    float* accs     = new float[6 * sph.getSize()];
+    float* vertices = new float[100000];
+    float* vertices_diffuse = new float[100000];
 
     sph.getPositions(vertices); 
     sph.applyGForces();
@@ -315,13 +317,23 @@ int main()
             sph.applySPHForces();
             sph.applyPenaltyForces();
             sph.integrate();
+            sph.applyImplicitViscosity();
 
             float t2 = glfwGetTime();
 
-            int length = sph.getTriangleFacets(vertices, 15);
             display_ctn(lineShader, container_lb, container_ub);
-            display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
 
+            int length = sph.getTriangleFacets(vertices, 15);
+            display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
+            
+            int l1 = sph.getDiffusePositions(vertices_diffuse, 1);
+            int l2 = sph.getDiffusePositions(vertices_diffuse + 3 * l1, 2);
+            int l3 = sph.getDiffusePositions(vertices_diffuse + 3 * (l1 + l2), 3);
+
+            display_sph(sphereShader, vertices_diffuse,                 l1 * 3, vec3(1, 1, 1));
+            display_sph(sphereShader, vertices_diffuse + 3 * l1,        l2 * 3, vec3(0.6, 0.6, 0.6));
+            display_sph(sphereShader, vertices_diffuse + 3 * (l1 + l2), l3 * 3, vec3(0, 0, 1));
+ 
             // sph.getPosAcc(accs);
             // sph.getPositions(vertices);
             // display_sph(fluidShader, vertices, 3 * sph.getSize());
@@ -332,7 +344,7 @@ int main()
             physicsTime += t2 - t1;
             renderTime + t3 - t2;
         
-            printf("physics: %.4fs\trender: %.4fs\n", physicsTime, renderTime);
+            // printf("physics: %.4fs\trender: %.4fs\n", physicsTime, renderTime);
         }
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

@@ -18,7 +18,7 @@
 #define LOG 0
 #define SHOW_FPRES 0
 #define SHOW_FVISC 0
-#define PI 3.14159265358979323846264338327950288
+#define PI 3.14159265358979323846264338327950288f
 
 using namespace std;
 using namespace glm;
@@ -39,6 +39,7 @@ private:
     vec3 g_d;
     vec3 container_lb;
     vec3 container_ub;
+    vec3 Imax;
 
     float k;
     float g;
@@ -47,6 +48,7 @@ private:
     float sptRadius;
     float smtRadius;
     float penalty;
+    float itgPenalty;
     float viscosity;
     float kdiffuse, kb, kd;
 
@@ -86,24 +88,24 @@ private:
 
     float Wdiffuse(float length_x_ij, float influenceRadius) {
         if (length_x_ij <= influenceRadius) {
-            return 1 - length_x_ij / influenceRadius;
+            return (1.0f - length_x_ij / influenceRadius) * 3.0f / (PI * pow(influenceRadius, 3));
         } else return 0;
     }
 
 public:
     SPHSystem(
-        vec3 pos, vec3 vel, vec3 size, vec3 gap, 
+        vec3 pos, vec3 vel, vec3 size, vec3 gap,
         float dt, float m_d, float g_d,
         vec3 container_lb, vec3 container_ub,
-        float g, float penalty, float k, float density0,
+        float g, float penalty, float itgPenalty, float k, float density0,
         float sptRadius, float smtRadius, float viscosity,
-        float kdiffuse, float kb, float kd
+        float kdiffuse, float kb, float kd, vec3 Imax
     ) :
         spos(pos), size(size), gap(gap), dt(dt), m_d(m_d), g_d(g_d),
         container_lb(container_lb), container_ub(container_ub),
-        g(g), penalty(penalty), k(k), density0(density0), 
+        g(g), penalty(penalty), itgPenalty(itgPenalty), k(k), density0(density0), 
         sptRadius(sptRadius), smtRadius(smtRadius), viscosity(viscosity), 
-        kdiffuse(kdiffuse), kb(kb), kd(kd)
+        kdiffuse(kdiffuse), kb(kb), kd(kd), Imax(Imax)
     {
         this->table = new SpatialHashTable(m_d);
         this->grid = new SpatialGrid(container_lb, container_ub, g_d, smtRadius);
@@ -130,10 +132,10 @@ public:
     void integrate() {
         #pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++)
-            Ps[i]->integrate(dt, penalty);
+            Ps[i]->integrate(dt, itgPenalty);
         #pragma omp parallel for
         for (int i = 0; i < DPs.size(); i++)
-            Ps[i]->integrate(dt, penalty);
+            DPs[i]->integrate(dt, itgPenalty);
     }
 
     void build() {
@@ -148,6 +150,8 @@ public:
         maintainDiffuseParticles();
         
         grid->computeDensityTable(table);
+
+        printf("Particles:%d\tDiffuse:%d\n", Ps.size(), DPs.size());
     }
 
 
@@ -233,40 +237,41 @@ public:
         // -----------------------
         // compute F_viscosity
         // -----------------------
-        vec3 ddVisc(0, 0, 0);
-        if (SHOW_FVISC) {
-            vec3 tpos = pos;
-            printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tvel: %.2f-%.2f-%.2f\n",
-                tpos.x, tpos.y, tpos.z, mass, vel.x, vel.y, vel.z);
-        }
-#pragma omp parallel for
-        for (int j = 0; j < neighbors->size(); j++) {
-            FluidParticle* p_j = neighbors->at(j);
-            float mass_j = p_j->getMass();
-            float dens_j = p_j->getDensity();
-            vec3 x_ij = pos - p_j->getPosition();
-            vec3 v_ij = vel - p_j->getVelocity();
-            vec3 dW_ij = dW(p, p_j);
-            vec3 ddVisc_j = mass_j / dens_j * v_ij * (dot(x_ij, dW_ij) / (dot(x_ij, x_ij) + 0.01 * pow(smtRadius, 2)));
-            ddVisc += ddVisc_j;
+        //vec3 ddVisc(0, 0, 0);
+        //if (SHOW_FVISC) {
+        //    vec3 tpos = pos;
+        //    printf("stats of %.0f-%.0f-%.0f:\tmass: %.2f\tvel: %.2f-%.2f-%.2f\n",
+        //        tpos.x, tpos.y, tpos.z, mass, vel.x, vel.y, vel.z);
+        //}
+        //#pragma omp parallel for
+        //for (int j = 0; j < neighbors->size(); j++) {
+        //    FluidParticle* p_j = neighbors->at(j);
+        //    float mass_j = p_j->getMass();
+        //    float dens_j = p_j->getDensity();
+        //    vec3 x_ij = pos - p_j->getPosition();
+        //    vec3 v_ij = vel - p_j->getVelocity();
+        //    vec3 dW_ij = dW(p, p_j);
+        //    vec3 ddVisc_j = mass_j / dens_j * v_ij * (dot(x_ij, dW_ij) / (dot(x_ij, x_ij) + 0.01 * pow(smtRadius, 2)));
+        //    ddVisc += ddVisc_j;
 
-            if (SHOW_FVISC) {
-                vec3 tpos = p_j->getPosition();
-                printf("\tstats of %.0f-%.0f-%.0f:\tmass: %.2f  density: %.2f  dW: %.2f-%.2f-%.2f  ddVisc: %.2f-%.2f-%.2f\n",
-                    tpos.x, tpos.y, tpos.z,
-                    mass_j, dens_j,
-                    dW_ij.x, dW_ij.y, dW_ij.z,
-                    ddVisc_j.x, ddVisc_j.y, ddVisc_j.z
-                );
-            }
-        }
-        vec3 Fvisc = 2 * mass * viscosity * ddVisc;
-        if (SHOW_FVISC) {
-            printf("ddVisc: %.4f %.4f %.4f\n", ddVisc.x, ddVisc.y, ddVisc.z);
-            printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);
-        }
+        //    if (SHOW_FVISC) {
+        //        vec3 tpos = p_j->getPosition();
+        //        printf("\tstats of %.0f-%.0f-%.0f:\tmass: %.2f  density: %.2f  dW: %.2f-%.2f-%.2f  ddVisc: %.2f-%.2f-%.2f\n",
+        //            tpos.x, tpos.y, tpos.z,
+        //            mass_j, dens_j,
+        //            dW_ij.x, dW_ij.y, dW_ij.z,
+        //            ddVisc_j.x, ddVisc_j.y, ddVisc_j.z
+        //        );
+        //    }
+        //}
+        //vec3 Fvisc = 2 * mass * viscosity * ddVisc;
+        //if (SHOW_FVISC) {
+        //    printf("ddVisc: %.4f %.4f %.4f\n", ddVisc.x, ddVisc.y, ddVisc.z);
+        //    printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);
+        //}
+
         p->setFpres(Fpres);
-        p->setFvisc(Fvisc);
+        p->setFvisc(vec3(0,0,0)); //p->setFvisc(Fvisc);
         p->setBuiltForcesFlag(true);
     }
 
@@ -289,13 +294,17 @@ public:
             float W_ij = Wdiffuse(length(x_ij), smtRadius);
 
             // Trapped Air
-            vi_diff += length(v_ij) * (1 - dot(normalize(v_ij), normalize(x_ij))) * W_ij;
+            vi_diff += length(v_ij) * (1.0f - dot(normalize(v_ij), normalize(x_ij))) * W_ij;
 
             // Wave Crest
             if (dot(-x_ij, n_i) < 0 && dot(normalize(v_i), normalize(n_i)) >= 0.6)
-                ki += (1 - dot(n_i, n_j)) * W_ij;
+                ki += (1.0f - dot(normalize(n_i), normalize(n_j))) * W_ij;
         }
         p->setDiffusePotential(vi_diff, ki, Eki);
+    }
+
+    float clamp(float I, float Tmin, float Tmax) {
+        return (std::min(I, Tmax) - std::min(I, Tmin)) / (Tmax - Tmin);
     }
 
     void computeDiffusePotentials() {
@@ -303,11 +312,15 @@ public:
         for (int i = 0; i < Ps.size(); i++)
             computeDiffusePotential(Ps[i]);
 
-        vec3 Imax(0, 0, 0);
-        for (int i = 0; i < Ps.size(); i++) 
-            Imax += Ps[i]->getDiffusePotential();
+        //vec3 Imax(0, 0, 0);
+        //for (int i = 0; i < Ps.size(); i++) {
+        //    vec3 diffusePotential = Ps[i]->getDiffusePotential();
+        //    for (int j = 0 ; j < 3 ; j++)
+        //        Imax[j] = std::max(diffusePotential[j], Imax[j]);
+        //}
+        //printf("%.4f %.4f %.4f\n", Imax.x, Imax.y, Imax.z);
 
-        Imax /= (float) Ps.size();
+
         for (int i = 0; i < Ps.size(); i++) {
             vec3 I = Ps[i]->getDiffusePotential();
             Ps[i]->setDiffusePotential(
@@ -318,40 +331,62 @@ public:
         }
     }
 
+
+
+    void applyImplicitViscosity(FluidParticle* p) {
+        vec3 vel = p->getVelocity();
+        vector<FluidParticle*>* neighbors = p->getNeighbors(true);
+
+        vec3 dVel(0, 0, 0);
+#pragma omp parallel for
+        for (int j = 0; j < neighbors->size(); j++) {
+            FluidParticle* p_j = neighbors->at(j);
+            vec3 vel_j = p_j->getVelocity();
+            dVel += viscosity * W(p, p_j) * (vel_j - vel);
+        }
+        p->setVelocity(vel + dVel);
+    }
+
+    void applyImplicitViscosity() {
+#pragma omp parallel for
+        for (int i = 0; i < Ps.size(); i++) applyImplicitViscosity(Ps[i]);
+    }
     
     
+
     void maintainDiffuseParticles() {
         auto it = DPs.begin();
         while (it != DPs.end()) {
             if ((*it)->reduceLifetime()) it = DPs.erase(it); else it++;
         }
-
         for (int i = 0; i < Ps.size(); i++) {
             vec3 I = Ps[i]->getDiffusePotential();
-            int n = dt * kdiffuse * (I.x + I.y + I.z);
-
+            int n = dt* kdiffuse* I.z* (I.x + I.y);
+            // printf("%.2f ", dt * kdiffuse * I.z * (I.x + I.y));
             for (int k = 0; k < n; k++) {
-                DiffuseParticle* p = new DiffuseParticle(Ps[i]->getPosition(), Ps[i]->getMass(), 0, 15);
+                vec3 pos = Ps[i]->getPosition() + 
+                    vec3(0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX);
+                DiffuseParticle* p = new DiffuseParticle(pos, Ps[i]->getMass(), 0, 12);
                 DPs.push_back(p);
             }
         }
-
         for (int i = 0; i < DPs.size(); i++) computeNeighborBlocks(DPs[i]);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < DPs.size(); i++) computeNeighbors(DPs[i]);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < DPs.size(); i++) computeDiffuseType(DPs[i]);
-        #pragma omp parallel for
-        for (int i = 0; i < DPs.size(); i++) applyDiffuseForces(DPs[i]);
     }
 
     vec3 computeDiffuseNeighborAvgVel(DiffuseParticle* dp) {
         vec3 res(0, 0, 0);
+        float totalW = 0.0f;
         vector<FluidParticle*>* neighbors = dp->getNeighbors(true);
-#pragma omp parallel for
-        for (int i = 0; i < neighbors->size(); i++)
-            res += neighbors->at(i)->getVelocity() * W(dp, neighbors->at(i));
-        return res / ((float)neighbors->size());
+        for (int i = 0; i < neighbors->size(); i++) {
+            float Wi = W(dp, neighbors->at(i));
+            res += neighbors->at(i)->getVelocity() * Wi;
+            totalW += Wi;
+        }
+        return res / totalW;
     }
 
     vec3 computeDiffuseFexp(DiffuseParticle* dp) {
@@ -371,13 +406,13 @@ public:
     void applyDiffuseForces(DiffuseParticle* dp) {
         vec3 acc(0, 0, 0);
         if (dp->getDiffuseType() == DiffuseParticle::TYPE_SPRY) {
-            acc = computeDiffuseFexp(dp) / dp->getMass() + g;
+            acc = computeDiffuseFexp(dp) / dp->getMass() + vec3(0, -g, 0);
         }
         else if (dp->getDiffuseType() == DiffuseParticle::TYPE_FOAM) {
             acc = computeDiffuseNeighborAvgVel(dp) / dt;
         }
         else if (dp->getDiffuseType() == DiffuseParticle::TYPE_BUBB) {
-            acc = -kb * g + kd * (computeDiffuseNeighborAvgVel(dp) - dp->getVelocity());
+            acc = -kb * vec3(0, -g, 0) + kd * (computeDiffuseNeighborAvgVel(dp) - dp->getVelocity());
         }
         dp->applyTempForce(acc * dp->getMass());
     }
@@ -412,6 +447,9 @@ public:
             Ps[i]->applyTempForce(Ps[i]->getFpres());
             Ps[i]->applyTempForce(Ps[i]->getFvisc());
         }
+#pragma omp parallel for
+        for (int i = 0; i < DPs.size(); i++)
+            applyDiffuseForces(DPs[i]);
     }
 
     void setContainer(vec3 container_lb, vec3 container_ub) {
@@ -478,16 +516,12 @@ public:
         }
     }
 
-    int getSize() {
-        return Ps.size();
-    }
-
     vector<FluidParticle*>* getFluidParticles() { return &Ps; }
 
     vector<DiffuseParticle*>* getDiffuseParticles() { return &DPs;  }
 
     void getPositions(float* pos) {
-#pragma omp parallel for
+        #pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             vec3 ppos = Ps[i]->getPosition();
             for (int j = 0 ; j < 3 ; j++) pos[3 * i + j] = ppos[j];
@@ -500,6 +534,17 @@ public:
             vec3 pvel = Ps[i]->getVelocity();
             for (int j = 0 ; j < 3 ; j++) vel[3 * i + j] = pvel[j];
         }
+    }
+
+    int getDiffusePositions(float* pos, int type) {
+        int cnt = 0;
+        for (int i = 0; i < DPs.size(); i++) {
+            if (DPs[i]->getDiffuseType() != type) continue;
+            vec3 ppos = DPs[i]->getPosition();
+            for (int j = 0; j < 3; j++) pos[3 * cnt + j] = ppos[j];
+            cnt++;
+        }
+        return cnt;
     }
 
     void getPosAcc(float* posacc) {
