@@ -89,10 +89,10 @@ private:
     }
 
     float C(float r) {
-        if (2 * r > smtRadius && r <= smtRadius)
-            return 32.0f / PI / pow(smtRadius, 9) * (pow(smtRadius - r, 3) * pow(r, 3));
-        else if (r > 0 && 2 * r <= smtRadius)
-            return 32.0f / PI / pow(smtRadius, 9) * (2 * pow(smtRadius - r, 3) * pow(r, 3) - pow(smtRadius, 6) / 64.0f);
+        if (2 * r > sptRadius && r <= sptRadius)
+            return 32.0f / PI / pow(sptRadius, 9) * (pow(sptRadius - r, 3) * pow(r, 3));
+        else if (r > 0 && 2 * r <= sptRadius)
+            return 32.0f / PI / pow(sptRadius, 9) * (2 * pow(sptRadius - r, 3) * pow(r, 3) - pow(sptRadius, 6) / 64.0f);
         else
             return 0.0f;
     }
@@ -298,6 +298,7 @@ public:
         //    printf("ddVisc: %.4f %.4f %.4f\n", ddVisc.x, ddVisc.y, ddVisc.z);
         //    printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);
         //}
+        // p->setFvisc(Fvisc);
 
         // -----------------------
         // compute F_cohesion F_curvature
@@ -410,7 +411,7 @@ public:
             for (int k = 0; k < n; k++) {
                 vec3 pos = Ps[i]->getPosition() + 
                     vec3(0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX);
-                DiffuseParticle* p = new DiffuseParticle(pos, Ps[i]->getMass(), 0, 20);
+                DiffuseParticle* p = new DiffuseParticle(pos, Ps[i]->getMass(), 0, 1);
                 DPs.push_back(p);
             }
         }

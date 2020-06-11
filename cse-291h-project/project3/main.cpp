@@ -18,7 +18,7 @@ const unsigned int SCR_HEIGHT = 1080;
 vec3 lightPos(2.0f, 10.0f, 2.0f);
 
 // camera
-Camera camera(vec3(1.5f, 2.0f, 10.0f));
+Camera camera(vec3(3.0f, 2.0f, 15.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -283,7 +283,7 @@ int main()
 	const float g = 800;
 	const float k = 1e4f;
 	const float penalty = 1e6f;
-	const float viscosity = 5e-5f;
+    const float viscosity = 5e-5f;
 	const float density0 = 1e3;
 	const float surfaceTension = 0.0f;
 	const float norm_h = 1.0f;
@@ -297,12 +297,12 @@ int main()
 	const float kb = 20, kd = 100;
 	const vec3  Imax(70000.0f, 1500.0f, 500.f);
 
-	const vec3  pos(0.6, 0.6, 0.6);
-	const vec3  vel(0.0, -30.0, 0.0);
+	const vec3  pos(2.6, 0.0, 2.6);
+	const vec3  vel(0.0, 0.0, 0.0);
 	const vec3  size(16, 16, 16);
 	const vec3  gap(0.08, 0.08, 0.08);
 	const vec3  container_lb(0, 0, 0);
-	const vec3  container_ub(3, 3, 3);
+	const vec3  container_ub(6, 2, 6);
 
     lightPos = { 1.5f, 3.0f, 3.0f };
     deltaTime = 5e-4f;
@@ -351,10 +351,10 @@ int main()
 
             display_ctn(lineShader, container_lb, container_ub);
 
-            int length = sph.getTriangleFacets(vertices, 15);
-            display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
-            //int length = sph.getPositions(vertices);
-            //display_sph(sphereShader, vertices, 3 * length, vec3(0.3, 0.3, 1.0));
+            //int length = sph.getTriangleFacets(vertices, 15);
+            //display_sph_triangle(fluidShader, vertices, 2 * 9 * length);
+            int length = sph.getPositions(vertices);
+            display_sph(sphereShader, vertices, 3 * length, vec3(0.3, 0.3, 1.0));
             
             //int l1 = sph.getDiffusePositions(vertices_diffuse, 1);
             //int l2 = sph.getDiffusePositions(vertices_diffuse + 3 * l1, 2);
