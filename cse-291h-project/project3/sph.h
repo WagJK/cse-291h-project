@@ -410,7 +410,7 @@ public:
             for (int k = 0; k < n; k++) {
                 vec3 pos = Ps[i]->getPosition() + 
                     vec3(0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX, 0.02 * rand() / RAND_MAX);
-                DiffuseParticle* p = new DiffuseParticle(pos, Ps[i]->getMass(), 0, 12);
+                DiffuseParticle* p = new DiffuseParticle(pos, Ps[i]->getMass(), 0, 20);
                 DPs.push_back(p);
             }
         }
@@ -450,15 +450,16 @@ public:
     void applyDiffuseForces(DiffuseParticle* dp) {
         vec3 acc(0, 0, 0);
         if (dp->getDiffuseType() == DiffuseParticle::TYPE_SPRY) {
-            acc = computeDiffuseFexp(dp) / dp->getMass() + vec3(0, -g, 0);
+            acc = (computeDiffuseFexp(dp) + vec3(0, -g, 0)) / dp->getMass();
+            dp->applyTempForce(acc * dp->getMass());
         }
         else if (dp->getDiffuseType() == DiffuseParticle::TYPE_FOAM) {
-            acc = computeDiffuseNeighborAvgVel(dp) / dt;
+            dp->setVelocity(computeDiffuseNeighborAvgVel(dp));
         }
         else if (dp->getDiffuseType() == DiffuseParticle::TYPE_BUBB) {
             acc = -kb * vec3(0, -g, 0) + kd * (computeDiffuseNeighborAvgVel(dp) - dp->getVelocity());
+            dp->applyTempForce(acc * dp->getMass());
         }
-        dp->applyTempForce(acc * dp->getMass());
     }
 
 
@@ -564,12 +565,13 @@ public:
 
     vector<DiffuseParticle*>* getDiffuseParticles() { return &DPs;  }
 
-    void getPositions(float* pos) {
-        #pragma omp parallel for
+    int getPositions(float* pos) {
+#pragma omp parallel for
         for (int i = 0 ; i < Ps.size() ; i++) {
             vec3 ppos = Ps[i]->getPosition();
             for (int j = 0 ; j < 3 ; j++) pos[3 * i + j] = ppos[j];
         }
+        return Ps.size();
     }
 
     void getVelocities(float* vel) {
