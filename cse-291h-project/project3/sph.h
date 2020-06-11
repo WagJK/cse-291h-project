@@ -50,6 +50,8 @@ private:
     float penalty;
     float itgPenalty;
     float viscosity;
+    float surfaceTension;
+    float norm_h;
     float kdiffuse, kb, kd;
 
     float f(float q) {
@@ -86,11 +88,22 @@ private:
         return 1.0 / pow(smtRadius, 4) * df(q) * norm;
     }
 
+    float C(float r) {
+        if (2 * r > smtRadius && r <= smtRadius)
+            return 32.0f / PI / pow(smtRadius, 9) * (pow(smtRadius - r, 3) * pow(r, 3));
+        else if (r > 0 && 2 * r <= smtRadius)
+            return 32.0f / PI / pow(smtRadius, 9) * (2 * pow(smtRadius - r, 3) * pow(r, 3) - pow(smtRadius, 6) / 64.0f);
+        else
+            return 0.0f;
+    }
+
     float Wdiffuse(float length_x_ij, float influenceRadius) {
         if (length_x_ij <= influenceRadius) {
             return (1.0f - length_x_ij / influenceRadius) * 3.0f / (PI * pow(influenceRadius, 3));
         } else return 0;
     }
+
+
 
 public:
     SPHSystem(
@@ -98,13 +111,13 @@ public:
         float dt, float m_d, float g_d,
         vec3 container_lb, vec3 container_ub,
         float g, float penalty, float itgPenalty, float k, float density0,
-        float sptRadius, float smtRadius, float viscosity,
+        float sptRadius, float smtRadius, float viscosity, float surfaceTension, float norm_h,
         float kdiffuse, float kb, float kd, vec3 Imax
     ) :
         spos(pos), size(size), gap(gap), dt(dt), m_d(m_d), g_d(g_d),
         container_lb(container_lb), container_ub(container_ub),
         g(g), penalty(penalty), itgPenalty(itgPenalty), k(k), density0(density0), 
-        sptRadius(sptRadius), smtRadius(smtRadius), viscosity(viscosity), 
+        sptRadius(sptRadius), smtRadius(smtRadius), viscosity(viscosity), surfaceTension(surfaceTension), norm_h(norm_h),
         kdiffuse(kdiffuse), kb(kb), kd(kd), Imax(Imax)
     {
         this->table = new SpatialHashTable(m_d);
@@ -130,10 +143,10 @@ public:
     }
 
     void integrate() {
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++)
             Ps[i]->integrate(dt, itgPenalty);
-        #pragma omp parallel for
+#pragma omp parallel for
         for (int i = 0; i < DPs.size(); i++)
             DPs[i]->integrate(dt, itgPenalty);
     }
@@ -163,6 +176,8 @@ public:
 #pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) computeBasics(Ps[i]);
 #pragma omp parallel for
+        for (int i = 0; i < Ps.size(); i++) computeNormals(Ps[i]);
+#pragma omp parallel for
         for (int i = 0; i < Ps.size(); i++) computeForces(Ps[i]);
     }
 
@@ -180,17 +195,29 @@ public:
         vec3 pos = p->getPosition();
         vector<FluidParticle*>* neighbors = p->getNeighbors(true);
         // compute density & pressure
-        float dens = 0; vec3 norm = {0, 0, 0};
+        float dens = 0; 
         for (int j = 0; j < neighbors->size(); j++) {
             FluidParticle* p_j = neighbors->at(j);
             dens += p_j->getMass() * W(p, p_j);
-            norm += p_j->getMass() * dW(p, p_j);
         }
-        float pres = k * (pow(dens / density0, 7) - 1);
         p->setDensity(dens);
-        p->setNormal(norm);
+        float pres = k * (pow(dens / density0, 7) - 1);
         p->setPressure(pres);
         p->setBuiltBasicsFlag(true);
+    }
+
+    void computeNormals(FluidParticle* p) {
+        vector<FluidParticle*>* neighbors = p->getNeighbors(true);
+        vec3 norm = { 0, 0, 0 };
+        for (int j = 0; j < neighbors->size(); j++) {
+            FluidParticle* p_j = neighbors->at(j);
+            float mass_j = p_j->getMass();
+            float dens_j = p_j->getDensity();
+            norm += norm_h * mass_j / dens_j * dW(p, p_j);
+            // norm += p_j->getMass() * dW(p, p_j);
+        }
+        // printf("%.2f %.2f %.2f\n", norm.x, norm.y, norm.z);
+        p->setNormal(norm);
     }
 
     void computeForces(FluidParticle* p) {
@@ -234,6 +261,8 @@ public:
             printf("dpres: %.4f %.4f %.4f\n", dPres.x, dPres.y, dPres.z);
             printf("Fpres: %.4f %.4f %.4f\n", Fpres.x, Fpres.y, Fpres.z);
         }
+        p->setFpres(Fpres);
+
         // -----------------------
         // compute F_viscosity
         // -----------------------
@@ -270,8 +299,23 @@ public:
         //    printf("Fvisc: %.4f %.4f %.4f\n", Fvisc.x, Fvisc.y, Fvisc.z);
         //}
 
-        p->setFpres(Fpres);
-        p->setFvisc(vec3(0,0,0)); //p->setFvisc(Fvisc);
+        // -----------------------
+        // compute F_cohesion F_curvature
+        // -----------------------
+        vec3 Fcohs(0, 0, 0), Fcurv(0, 0, 0);
+        for (int j = 0; j < neighbors->size(); j++) {
+            FluidParticle* p_j = neighbors->at(j);
+            vec3 pos_j = p_j->getPosition();
+            float mass_j = p_j->getMass();
+            float dens_j = p_j->getDensity();
+
+            float K_ij = 2 * density0 / (dens + dens_j);
+            Fcohs += mass_j * C(length(pos - pos_j)) * normalize(pos - pos_j) * K_ij;
+            Fcurv += (p->getNormal() - p_j->getNormal()) * K_ij;
+        }
+        Fcohs *= -surfaceTension * mass;
+        Fcurv *= -surfaceTension * mass;
+        p->setFvisc(Fcurv + Fcohs);
         p->setBuiltForcesFlag(true);
     }
 

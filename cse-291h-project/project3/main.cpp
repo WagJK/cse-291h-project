@@ -18,7 +18,7 @@ const unsigned int SCR_HEIGHT = 1080;
 vec3 lightPos(2.0f, 10.0f, 2.0f);
 
 // camera
-Camera camera(vec3(0.0f, 0.0f, 10.0f));
+Camera camera(vec3(1.5f, 2.0f, 15.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -246,6 +246,7 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    // glEnable(GL_BLEND);
 
     // build and compile our shader zprogram
     // ------------------------------------
@@ -256,10 +257,13 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
     const float g = 800;
-    const float k = 1e4;
-    const float penalty = 1e6;
-    const float viscosity = 7e-3f;
+    const float k = 1e4f;
+    const float penalty = 1e6f;
+    const float viscosity = 5e-5f;
     const float density0 = 1e3;
+    const float surfaceTension = 5.0f;
+    const float norm_h = 1.0f;
+
     const float sptRadius = 0.2f;
     const float smtRadius = 0.1f;
     const float m_d = sptRadius;
@@ -270,11 +274,11 @@ int main()
     const vec3  Imax(70000.0f, 1500.0f, 500.f);
 
     const vec3  pos(0.6, 0.6, 0.6);
-    const vec3  vel(0.0, -30.0, 0.0);
+    const vec3  vel(0.0, -5.0, 0.0);
     const vec3  size(16, 16, 16);
     const vec3  gap(0.08, 0.08, 0.08);
     const vec3  container_lb(0, 0, 0);
-    const vec3  container_ub(3, 3, 3);
+    const vec3  container_ub(6, 6, 3);
 
     lightPos = { 1.5f, 3.0f, 3.0f };
     deltaTime = 5e-4f;
@@ -283,7 +287,7 @@ int main()
         pos, vel, size, gap, deltaTime, m_d, g_d,
         container_lb, container_ub, 
         g, penalty, 1.0f, k, density0, 
-        sptRadius, smtRadius, viscosity, 
+        sptRadius, smtRadius, viscosity, surfaceTension, norm_h,
         kdiffuse, kb, kd, Imax
     );
     
@@ -390,17 +394,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (firstMouse)
-    {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-    lastX = xpos;
-    lastY = ypos;
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    //if (firstMouse)
+    //{
+    //    lastX = xpos;
+    //    lastY = ypos;
+    //    firstMouse = false;
+    //}
+    //float xoffset = xpos - lastX;
+    //float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    //lastX = xpos;
+    //lastY = ypos;
+    //camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
